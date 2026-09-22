@@ -1,9 +1,13 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Layouts
 import { StoreLayout } from '../layouts/StoreLayout';
-import { AdminLayout } from '../layouts/AdminLayout';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { ProtectedRoute } from '../components/common/ProtectedRoute';
+
+import { ROL } from '../types/roles';
 
 // Auth Pages
 import { LoginPage } from '../features/auth/pages/LoginPage';
@@ -21,14 +25,14 @@ import { CheckoutPage } from '../features/checkout/pages/CheckoutPage';
 import { OrdersPage } from '../features/orders/pages/OrdersPage';
 import { OrderDetailPage } from '../features/orders/pages/OrderDetailPage';
 
-// Admin Pages
-import { DashboardPage } from '../features/admin/pages/DashboardPage';
-import { ProductsAdminPage } from '../features/admin/pages/ProductsAdminPage';
-import { InventoryAdminPage } from '../features/admin/pages/InventoryAdminPage';
-import { BranchesAdminPage } from '../features/admin/pages/BranchesAdminPage';
-import { ReservationsAdminPage } from '../features/admin/pages/ReservationsAdminPage';
-import { SalesAdminPage } from '../features/admin/pages/SalesAdminPage';
-import { UsersAdminPage } from '../features/admin/pages/UsersAdminPage';
+// Backoffice Pages
+import { DashboardPage } from '../features/home/pages/DashboardPage';
+import { ProductsAdminPage } from '../features/catalog/pages/ProductsAdminPage';
+import { InventoryAdminPage } from '../features/inventory/pages/InventoryAdminPage';
+import { BranchesAdminPage } from '../features/branches/pages/BranchesAdminPage';
+import { ReservationsAdminPage } from '../features/reservations/pages/ReservationsAdminPage';
+import { SalesAdminPage } from '../features/sales/pages/SalesAdminPage';
+import { UsersAdminPage } from '../features/auth/pages/UsersAdminPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
 
 export const AppRouter = () => {
@@ -41,7 +45,7 @@ export const AppRouter = () => {
           <Route path="/register" element={<RegisterPage />} />
         </Route>
 
-        {/* Store Routes */}
+        {/* Store Routes (Customer Facing) */}
         <Route path="/" element={<StoreLayout />}>
           <Route index element={<HomePage />} />
           <Route path="catalog" element={<CatalogPage />} />
@@ -55,17 +59,29 @@ export const AppRouter = () => {
           <Route path="orders/:id" element={<OrderDetailPage />} />
         </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="products" element={<ProductsAdminPage />} />
-          <Route path="inventory" element={<InventoryAdminPage />} />
-          <Route path="branches" element={<BranchesAdminPage />} />
-          <Route path="reservations" element={<ReservationsAdminPage />} />
-          <Route path="sales" element={<SalesAdminPage />} />
-          <Route path="users" element={<UsersAdminPage />} />
-          <Route path="reports" element={<ReportsPage />} />
+        {/* Dashboard Routes (Internal Personnel) */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute 
+              allowedRoles={[
+                ROL.ADMIN, 
+                ROL.ENCARGADO, 
+                ROL.CAJERO
+              ]} 
+            />
+          }
+        >
+          <Route element={<DashboardLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="products" element={<ProductsAdminPage />} />
+            <Route path="inventory" element={<InventoryAdminPage />} />
+            <Route path="branches" element={<BranchesAdminPage />} />
+            <Route path="reservations" element={<ReservationsAdminPage />} />
+            <Route path="sales" element={<SalesAdminPage />} />
+            <Route path="users" element={<UsersAdminPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

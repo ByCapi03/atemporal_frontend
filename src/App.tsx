@@ -1,9 +1,12 @@
 import { AppRouter } from './routes/AppRouter';
-import './style.css'; // Importing global styles if any
+import { AuthProvider } from './features/auth/context/AuthContext';
+import './style.css'; 
 
 function App() {
   return (
-    <AppRouter />
+    <AuthProvider>
+      <AppRouter />
+    </AuthProvider>
   );
 }
 
