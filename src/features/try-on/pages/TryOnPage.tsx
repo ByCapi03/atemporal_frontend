@@ -7,7 +7,8 @@ interface ProductDetail {
   id: number;
   name: string;
   price: number;
-  arImageUrl: string;
+  imageUrl?: string;
+  arImageUrl: string | null;
   arType: 'TOP' | 'BOTTOM' | 'DRESS';
 }
 
@@ -33,26 +34,25 @@ export const TryOnPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await api.get(`/store/variants/${variantId}`);
-        // Assuming backend returns product info along with variant.
-        // Wait, the API might not return this format. Let's fetch the product from variant.productId.
-        const productData = await api.get(`/store/products/${data.productId}`);
+        const { data } = await api.get(`/store/try-on/${variantId}`);
+        const productData = data.product;
         
-        if (!productData.data.arEnabled || !productData.data.arImageUrl) {
-          setError('Este producto no soporta prueba virtual.');
+        const effectiveImageUrl = productData.arImageUrl || productData.imageUrl;
+        if (!productData.arEnabled || !productData.arType || !effectiveImageUrl) {
+          setError('Este producto no soporta prueba virtual o carece de información requerida.');
           return;
         }
 
         const img = new Image();
-        img.src = productData.data.arImageUrl;
+        img.src = effectiveImageUrl;
         img.crossOrigin = "anonymous";
         img.onload = () => {
           garmentImage.current = img;
         };
 
-        setProduct(productData.data);
+        setProduct(productData);
       } catch (err) {
-        setError('Error al cargar la informacin del producto.');
+        setError('Error al cargar la información del producto.');
       } finally {
         setLoading(false);
       }
@@ -80,7 +80,8 @@ export const TryOnPage = () => {
           };
         }
       } catch (err) {
-        setCameraError('Permiso de cmera denegado o no disponible.');
+        console.error('Error de cámara:', err);
+        setCameraError('Permiso de cámara denegado o no disponible.');
       }
     };
 
@@ -152,7 +153,9 @@ export const TryOnPage = () => {
         const shoulderDist = Math.hypot(rs.x - ls.x, rs.y - ls.y);
         const torsoHeight = Math.hypot(midHip.x - midShoulder.x, midHip.y - midShoulder.y);
         
-        const angle = Math.atan2(rs.y - ls.y, rs.x - ls.x);
+        // Fix rotation: En un canvas invertido (scale(-1, 1)), el hombro izquierdo (ls) 
+        // tiene mayor X que el derecho (rs). Para que el ángulo sea 0 en lugar de 180, usamos ls.x - rs.x.
+        const angle = Math.atan2(rs.y - ls.y, ls.x - rs.x);
         
         const width = shoulderDist * 1.6;
         const height = torsoHeight * 1.3;
@@ -168,7 +171,7 @@ export const TryOnPage = () => {
         
         const midHip = { x: (lh.x + rh.x) / 2, y: (lh.y + rh.y) / 2 };
         const hipDist = Math.hypot(rh.x - lh.x, rh.y - lh.y);
-        const angle = Math.atan2(rh.y - lh.y, rh.x - lh.x);
+        const angle = Math.atan2(rh.y - lh.y, lh.x - rh.x);
         
         const width = hipDist * 1.8;
         let height = width * 1.5; // default fallback height
@@ -189,7 +192,7 @@ export const TryOnPage = () => {
         const midShoulder = { x: (ls.x + rs.x) / 2, y: (ls.y + rs.y) / 2 };
         const midHip = { x: (lh.x + rh.x) / 2, y: (lh.y + rh.y) / 2 };
         const shoulderDist = Math.hypot(rs.x - ls.x, rs.y - ls.y);
-        const angle = Math.atan2(rs.y - ls.y, rs.x - ls.x);
+        const angle = Math.atan2(rs.y - ls.y, ls.x - rs.x);
         
         const width = shoulderDist * 1.6;
         let height = 0;
@@ -211,11 +214,65 @@ export const TryOnPage = () => {
 
       ctx.restore();
       
-      if (detected !== !noBodyDetected) {
-         setNoBodyDetected(!detected);
+      // Fix React stale closure: use callback form to compare with latest state
+      setNoBodyDetected(prev => {
+        if (prev === detected) return !detected;
+        return prev;
+      });
+      
+      if (!detected) {
+         clearSmoothing();
       }
+
+      // ----------------------------------------------------
+      // DEBUG VISUALIZATION
+      // ----------------------------------------------------
+      ctx.save();
+      const drawDebugKp = (label: string, kp: any) => {
+        if (!kp) return;
+        
+        // El canvas principal está sin voltear al momento de este ctx.save(),
+        // pero la vista de video está volteada con CSS scaleX(-1).
+        // Si no volteamos el ctx, dibujaremos en coordenadas físicas.
+        // Pero los puntos kps ya vienen orientados según el frame de video.
+        // Como disableFlipHorizontal es true (flipHorizontal: false), MoveNet
+        // asume la imagen tal cual. El video visualmente está volteado.
+        // Para alinear el debug con el canvas sin rotar (pero que coincida visualmente):
+        const x = canvas.width - kp.x;
+        const y = kp.y;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = kp.score > 0.35 ? '#00FF00' : '#FF0000';
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 12px Arial';
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fillText(`${label} ${(kp.score || 0).toFixed(2)}`, x + 8, y + 4);
+        ctx.shadowColor = 'transparent';
+      };
+
+      drawDebugKp('LS', kps[5]);
+      drawDebugKp('RS', kps[6]);
+      drawDebugKp('LH', kps[11]);
+      drawDebugKp('RH', kps[12]);
+      drawDebugKp('LK', kps[13]);
+      drawDebugKp('RK', kps[14]);
+      ctx.restore();
+      // ----------------------------------------------------
     } else {
-      if (!noBodyDetected) setNoBodyDetected(true);
+      setNoBodyDetected(prev => {
+        if (prev === false) return true;
+        return prev;
+      });
+      clearSmoothing();
     }
 
     requestRef.current = requestAnimationFrame(renderLoop);

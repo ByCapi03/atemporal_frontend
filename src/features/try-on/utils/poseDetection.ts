@@ -44,13 +44,16 @@ const applySmoothing = (pose: any) => {
     if (!kp.name) return kp;
     
     const prev = previousKeypoints[kp.name];
-    if (prev && kp.score && kp.score > 0.3) {
+    if (prev && kp.score && kp.score >= 0.35) {
       kp.x = prev.x * (1 - SMOOTHING_FACTOR) + kp.x * SMOOTHING_FACTOR;
       kp.y = prev.y * (1 - SMOOTHING_FACTOR) + kp.y * SMOOTHING_FACTOR;
     }
     
-    if (kp.score && kp.score > 0.3) {
+    if (kp.score && kp.score >= 0.35) {
       previousKeypoints[kp.name] = { ...kp };
+    } else {
+      // If the point is low confidence, clear its history so we don't interpolate from a stale position later
+      delete previousKeypoints[kp.name];
     }
     
     return kp;

@@ -19,6 +19,15 @@ interface CartItem {
   quantity: number;
 }
 
+interface PosClient {
+  id: number;
+  name: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  hasDigitalAccount: boolean;
+}
+
 export const PosTerminalPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<PosProduct[]>([]);
@@ -29,9 +38,23 @@ export const PosTerminalPage = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('EFECTIVO');
-  const [clientId, setClientId] = useState('');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Client states
+  const [isAnonymousClient, setIsAnonymousClient] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<PosClient | null>(null);
+  
+  // Search client states
+  const [clientSearchQuery, setClientSearchQuery] = useState('');
+  const [clientSearchResults, setClientSearchResults] = useState<PosClient[]>([]);
+  const [isSearchingClient, setIsSearchingClient] = useState(false);
+
+  // New client modal states
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
+  const [newClient, setNewClient] = useState({ name: '', lastName: '', email: '', phone: '' });
+  const [creatingClient, setCreatingClient] = useState(false);
+  const [clientError, setClientError] = useState('');
 
   const fetchProducts = async () => {
     try {
@@ -49,6 +72,39 @@ export const PosTerminalPage = () => {
     fetchProducts();
   }, []);
 
+  const searchClients = async () => {
+    try {
+      setIsSearchingClient(true);
+      const res = await api.get(`/pos/clients?search=${encodeURIComponent(clientSearchQuery)}`);
+      setClientSearchResults(res.data);
+    } catch (err: any) {
+      setClientError(err.response?.data?.message || 'Error buscando clientes');
+    } finally {
+      setIsSearchingClient(false);
+    }
+  };
+
+  const handleCreateClient = async () => {
+    try {
+      setCreatingClient(true);
+      setClientError('');
+      const res = await api.post('/pos/clients', {
+        name: newClient.name,
+        lastName: newClient.lastName,
+        email: newClient.email,
+        phone: newClient.phone || undefined
+      });
+      setSelectedClient(res.data);
+      setIsAnonymousClient(false);
+      setShowNewClientModal(false);
+      setNewClient({ name: '', lastName: '', email: '', phone: '' });
+    } catch (err: any) {
+      setClientError(err.response?.data?.message || 'Error al crear cliente');
+    } finally {
+      setCreatingClient(false);
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products;
     const lowerQ = searchQuery.toLowerCase();
@@ -65,7 +121,7 @@ export const PosTerminalPage = () => {
     setCart(prev => {
       const existing = prev.find(item => item.product.variantId === product.variantId);
       if (existing) {
-        if (existing.quantity >= product.available) return prev; // Cannot exceed stock
+        if (existing.quantity >= product.available) return prev;
         return prev.map(item => 
           item.product.variantId === product.variantId 
             ? { ...item, quantity: item.quantity + 1 } 
@@ -109,17 +165,18 @@ export const PosTerminalPage = () => {
         }))
       };
 
-      if (clientId.trim()) {
-        payload.clientId = Number(clientId);
+      if (!isAnonymousClient && selectedClient) {
+        payload.clientId = selectedClient.id;
       }
 
       const res = await api.post('/pos/sales', payload);
       
-      setSuccessMessage(`Venta exitosa! ID: ${res.data.id} - Total: Bs. ${Number(res.data.total).toFixed(2)} - Pago: ${res.data.paymentMethod || paymentMethod}`);
+      setSuccessMessage(`Venta exitosa! ID: ${res.data.id} - Total: Bs. ${Number(res.data.total).toFixed(2)}`);
       setCart([]);
-      setClientId('');
+      setSelectedClient(null);
+      setIsAnonymousClient(true);
       setPaymentMethod('EFECTIVO');
-      await fetchProducts(); // Refresh stock
+      await fetchProducts();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al procesar la venta');
     } finally {
@@ -204,10 +261,84 @@ export const PosTerminalPage = () => {
         </div>
       </div>
 
-      {/* RIGHT: Cart */}
-      <div style={{ width: '350px', backgroundColor: '#fff', borderLeft: '1px solid #ddd', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid #ddd' }}>
-          <h3 style={{ margin: 0 }}>Carrito de Venta</h3>
+      {/* RIGHT: Cart & Client */}
+      <div style={{ width: '380px', backgroundColor: '#fff', borderLeft: '1px solid #ddd', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Client Section */}
+        <div style={{ padding: '20px', borderBottom: '1px solid #ddd', backgroundColor: '#fafafa' }}>
+          <h4 style={{ margin: '0 0 10px 0' }}>CLIENTE</h4>
+          
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '15px' }}>
+            <input 
+              type="radio" 
+              checked={isAnonymousClient} 
+              onChange={() => setIsAnonymousClient(true)}
+            />
+            Venta sin cliente
+          </label>
+          
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '10px' }}>
+            <input 
+              type="radio" 
+              checked={!isAnonymousClient} 
+              onChange={() => setIsAnonymousClient(false)}
+            />
+            Venta con cliente
+          </label>
+
+          {!isAnonymousClient && !selectedClient && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <input 
+                  type="text" 
+                  placeholder="Buscar cliente..." 
+                  value={clientSearchQuery}
+                  onChange={e => setClientSearchQuery(e.target.value)}
+                  style={{ flex: 1, padding: '6px', border: '1px solid #ccc', borderRadius: '4px' }}
+                />
+                <button onClick={searchClients} disabled={isSearchingClient} style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px' }}>
+                  {isSearchingClient ? '...' : 'Buscar'}
+                </button>
+              </div>
+              
+              {clientSearchResults.length > 0 && (
+                <div style={{ border: '1px solid #eee', maxHeight: '150px', overflowY: 'auto', backgroundColor: 'white', borderRadius: '4px' }}>
+                  {clientSearchResults.map(c => (
+                    <div 
+                      key={c.id} 
+                      style={{ padding: '8px', borderBottom: '1px solid #eee', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      onClick={() => setSelectedClient(c)}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{c.name} {c.lastName}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{c.email} | {c.phone || 'Sin tel.'}</div>
+                      </div>
+                      <button style={{ padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}>
+                        Seleccionar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <button 
+                onClick={() => setShowNewClientModal(true)} 
+                style={{ padding: '8px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '5px' }}
+              >
+                + Registrar cliente
+              </button>
+            </div>
+          )}
+
+          {!isAnonymousClient && selectedClient && (
+            <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#e9ecef', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <strong style={{ display: 'block', fontSize: '0.9rem' }}>{selectedClient.name} {selectedClient.lastName}</strong>
+                <span style={{ fontSize: '0.8rem', color: '#555' }}>{selectedClient.email}</span>
+              </div>
+              <button onClick={() => setSelectedClient(null)} style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
+            </div>
+          )}
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
@@ -248,17 +379,6 @@ export const PosTerminalPage = () => {
 
         <div style={{ padding: '20px', borderTop: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px' }}>Cliente ID (Opcional):</label>
-            <input 
-              type="number" 
-              placeholder="Ej. 123" 
-              value={clientId}
-              onChange={e => setClientId(e.target.value)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px' }}>Método de Pago:</label>
             <select 
               value={paymentMethod} 
@@ -279,23 +399,64 @@ export const PosTerminalPage = () => {
 
           <button 
             onClick={handleCheckout}
-            disabled={cart.length === 0 || checkoutLoading}
+            disabled={cart.length === 0 || checkoutLoading || (!isAnonymousClient && !selectedClient)}
             style={{ 
               width: '100%', 
               padding: '12px', 
-              backgroundColor: cart.length === 0 ? '#6c757d' : '#28a745', 
+              backgroundColor: (cart.length === 0 || (!isAnonymousClient && !selectedClient)) ? '#6c757d' : '#28a745', 
               color: '#fff', 
               border: 'none', 
               borderRadius: '4px', 
               fontWeight: 'bold', 
               fontSize: '1rem',
-              cursor: cart.length === 0 ? 'not-allowed' : 'pointer' 
+              cursor: (cart.length === 0 || (!isAnonymousClient && !selectedClient)) ? 'not-allowed' : 'pointer' 
             }}
           >
             {checkoutLoading ? 'Procesando...' : 'COBRAR'}
           </button>
         </div>
       </div>
+
+      {/* NEW CLIENT MODAL */}
+      {showNewClientModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '8px', width: '400px' }}>
+            <h3 style={{ marginTop: 0 }}>Registrar Cliente</h3>
+            {clientError && <div style={{ color: 'red', marginBottom: '15px', fontSize: '0.9rem' }}>{clientError}</div>}
+            
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px' }}>Nombre *</label>
+              <input type="text" value={newClient.name} onChange={e => setNewClient({...newClient, name: e.target.value})} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            </div>
+            
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px' }}>Apellido *</label>
+              <input type="text" value={newClient.lastName} onChange={e => setNewClient({...newClient, lastName: e.target.value})} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px' }}>Correo Electrónico *</label>
+              <input type="email" value={newClient.email} onChange={e => setNewClient({...newClient, email: e.target.value})} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px' }}>Teléfono (Opcional)</label>
+              <input type="text" value={newClient.phone} onChange={e => setNewClient({...newClient, phone: e.target.value})} style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button onClick={() => setShowNewClientModal(false)} style={{ padding: '8px 16px', border: '1px solid #ccc', backgroundColor: '#f8f9fa', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+              <button 
+                onClick={handleCreateClient} 
+                disabled={creatingClient || !newClient.name || !newClient.lastName || !newClient.email}
+                style={{ padding: '8px 16px', border: 'none', backgroundColor: '#007bff', color: 'white', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                {creatingClient ? 'Guardando...' : 'Guardar Cliente'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -8,6 +8,9 @@ interface Product {
   active: boolean;
   categoryId: number;
   imageUrl?: string;
+  arEnabled?: boolean;
+  arImageUrl?: string;
+  arType?: 'TOP' | 'BOTTOM' | 'DRESS' | null;
   category?: { name: string };
 }
 
@@ -16,9 +19,11 @@ export const ProductsSection = () => {
   const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
   
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ id: 0, name: '', price: '', categoryId: 0, active: true });
+  const [form, setForm] = useState({ id: 0, name: '', price: '', categoryId: 0, active: true, arEnabled: false, arType: '' });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedArFile, setSelectedArFile] = useState<File | null>(null);
+  const [previewArUrl, setPreviewArUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +67,25 @@ export const ProductsSection = () => {
     await api.post(`/products/${productId}/image`, formData);
   };
 
+  const handleArFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        alert('Formato de imagen AR no permitido');
+        return;
+      }
+      setSelectedArFile(file);
+      setPreviewArUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadArImage = async (productId: number, file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    await api.post(`/products/${productId}/ar-image`, formData);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -70,7 +94,9 @@ export const ProductsSection = () => {
         name: form.name,
         price: parseFloat(form.price),
         categoryId: Number(form.categoryId),
-        active: form.active
+        active: form.active,
+        arEnabled: form.arEnabled,
+        arType: form.arEnabled ? (form.arType || null) : null
       };
       
       let productId = form.id;
@@ -85,7 +111,15 @@ export const ProductsSection = () => {
         try {
           await uploadImage(productId, selectedFile);
         } catch (imgErr: any) {
-          alert('El producto se guard pero hubo un error al subir la imagen: ' + (imgErr.response?.data?.message || imgErr.message));
+          alert('El producto se guardó pero hubo un error al subir la imagen: ' + (imgErr.response?.data?.message || imgErr.message));
+        }
+      }
+
+      if (selectedArFile && productId) {
+        try {
+          await uploadArImage(productId, selectedArFile);
+        } catch (imgErr: any) {
+          alert('Error al subir la imagen AR: ' + (imgErr.response?.data?.message || imgErr.message));
         }
       }
 
@@ -99,16 +133,28 @@ export const ProductsSection = () => {
   };
 
   const resetForm = () => {
-    setForm({ id: 0, name: '', price: '', categoryId: 0, active: true });
+    setForm({ id: 0, name: '', price: '', categoryId: 0, active: true, arEnabled: false, arType: '' });
     setSelectedFile(null);
     setPreviewUrl(null);
+    setSelectedArFile(null);
+    setPreviewArUrl(null);
     setShowForm(false);
   };
 
   const handleEdit = (p: Product) => {
-    setForm({ id: p.id, name: p.name, price: String(p.price), categoryId: p.categoryId, active: p.active });
+    setForm({ 
+      id: p.id, 
+      name: p.name, 
+      price: String(p.price), 
+      categoryId: p.categoryId, 
+      active: p.active,
+      arEnabled: p.arEnabled || false,
+      arType: p.arType || ''
+    });
     setSelectedFile(null);
     setPreviewUrl(p.imageUrl || null);
+    setSelectedArFile(null);
+    setPreviewArUrl(p.arImageUrl || null);
     setShowForm(true);
   };
 
@@ -162,6 +208,44 @@ export const ProductsSection = () => {
               <input type="checkbox" checked={form.active} onChange={e => setForm({...form, active: e.target.checked})} />
               <label>Activo</label>
             </div>
+            <div style={{ gridColumn: '1 / -1', padding: '15px', backgroundColor: '#f9f9f9', border: '1px solid #ddd', borderRadius: '8px' }}>
+              <h4 style={{ marginBottom: '10px' }}>Vestidor Virtual (AR)</h4>
+              
+              <div className="form-group checkbox" style={{ marginBottom: '15px' }}>
+                <input type="checkbox" checked={form.arEnabled} onChange={e => setForm({...form, arEnabled: e.target.checked})} />
+                <label>Habilitar Realidad Aumentada</label>
+              </div>
+
+              {form.arEnabled && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div className="form-group">
+                    <label>Tipo de Prenda AR</label>
+                    <select required value={form.arType} onChange={e => setForm({...form, arType: e.target.value})}>
+                      <option value="">Seleccione...</option>
+                      <option value="TOP">Superior (Poleras, Camisas)</option>
+                      <option value="BOTTOM">Inferior (Pantalones, Faldas)</option>
+                      <option value="DRESS">Vestidos (Cuerpo Entero)</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Imagen especial para AR (opcional)</label>
+                    <input type="file" accept="image/jpeg, image/png, image/webp" onChange={handleArFileChange} />
+                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
+                      Si no se carga una imagen AR, se utilizará la imagen principal del producto.
+                    </p>
+                    {previewArUrl ? (
+                      <div style={{ marginTop: '10px' }}>
+                        <img src={previewArUrl} alt="Preview AR" style={{ width: '100px', height: '100px', objectFit: 'contain', borderRadius: '8px', backgroundColor: '#eee' }} />
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '10px', fontSize: '0.85rem', color: '#0056b3', fontWeight: 'bold' }}>
+                        Usando imagen principal como recurso AR.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Guardando...' : (form.id ? 'Guardar' : 'Crear')}
@@ -176,7 +260,8 @@ export const ProductsSection = () => {
             <th>ID</th>
             <th>Nombre</th>
             <th>Precio</th>
-            <th>Categora</th>
+            <th>Categoría</th>
+            <th>AR</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -195,6 +280,13 @@ export const ProductsSection = () => {
               <td>{p.name}</td>
               <td>Bs. {p.price}</td>
               <td>{p.category?.name}</td>
+              <td>
+                {p.arEnabled && p.arType ? (
+                  <span className="badge-active">{p.arType}</span>
+                ) : (
+                  <span className="badge-inactive" style={{ backgroundColor: '#eee', color: '#666' }}>No habilitado</span>
+                )}
+              </td>
               <td><span className={p.active ? 'badge-active' : 'badge-inactive'}>{p.active ? 'Activo' : 'Inactivo'}</span></td>
               <td>
                 <div className="crud-actions" style={{ gap: '5px' }}>
@@ -204,8 +296,8 @@ export const ProductsSection = () => {
               </td>
             </tr>
           ))}
-          {products.length === 0 && !error && <tr><td colSpan={7}>No hay productos</td></tr>}
-          {error && <tr><td colSpan={7} style={{ color: 'red', textAlign: 'center' }}>{error}</td></tr>}
+          {products.length === 0 && !error && <tr><td colSpan={8}>No hay productos</td></tr>}
+          {error && <tr><td colSpan={8} style={{ color: 'red', textAlign: 'center' }}>{error}</td></tr>}
         </tbody>
       </table>
     </div>

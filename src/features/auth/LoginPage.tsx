@@ -111,7 +111,11 @@ export const LoginPage = () => {
                 </form>
                 
                 <div className="register-link">
-                    ¿No tienes una cuenta? <a href="#">Regístrate aquí</a>
+                    ¿No tienes una cuenta? <a href="/register">Regístrate aquí</a>
+                </div>
+                <div className="register-link" style={{ marginTop: '10px' }}>
+                    ¿Ya compraste en nuestra tienda? <br/>
+                    <a href="/activate-account">Activa tu cuenta digital</a>
                 </div>
             </div>
         </div>

@@ -262,7 +262,7 @@ export const ProductDetailPage = () => {
                 )}
 
                 {/* Virtual Try-On Button */}
-                {selectedVariant && product.arEnabled && product.arImageUrl && (
+                {selectedVariant && product.arEnabled && product.arType && (product.arImageUrl || product.imageUrl) && (
                   <button 
                     style={{ width: '100%', padding: '15px', backgroundColor: '#e83e8c', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}
                     onClick={() => navigate(`/try-on/${selectedVariant.id}`)}

@@ -28,7 +28,11 @@ export const RegisterPage = () => {
       navigate('/'); // Go back to store
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || 'Error al registrar la cuenta.');
+      if (err.response?.data?.code === 'CLIENT_EXISTS_WITHOUT_DIGITAL_ACCOUNT') {
+        setError('CLIENT_EXISTS_WITHOUT_DIGITAL_ACCOUNT');
+      } else {
+        setError(err.response?.data?.message || 'Error al registrar la cuenta.');
+      }
     } finally {
       setLoading(false);
     }
@@ -42,7 +46,21 @@ export const RegisterPage = () => {
           <p>Regístrate para hacer reservas y compras</p>
         </div>
 
-        {error && <div className="error-alert">{error}</div>}
+        {error === 'CLIENT_EXISTS_WITHOUT_DIGITAL_ACCOUNT' ? (
+          <div className="error-alert" style={{ textAlign: 'center' }}>
+            <p style={{ marginBottom: '10px', fontWeight: 'bold' }}>Ya eres cliente de nuestra tienda.</p>
+            <p style={{ marginBottom: '15px' }}>Para realizar compras online, necesitas activar tu cuenta digital.</p>
+            <button 
+              type="button" 
+              onClick={() => navigate('/activate-account')}
+              style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%', fontWeight: 'bold' }}
+            >
+              ACTIVAR MI CUENTA
+            </button>
+          </div>
+        ) : error ? (
+          <div className="error-alert">{error}</div>
+        ) : null}
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
