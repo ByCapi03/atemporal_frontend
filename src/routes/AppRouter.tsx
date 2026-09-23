@@ -10,6 +10,7 @@ import { ROL } from '../types/roles';
 
 // Auth Pages
 import { LoginPage } from '../features/auth/LoginPage';
+import { RegisterPage } from '../features/auth/RegisterPage';
 import { ChangePasswordPage } from '../features/auth/ChangePasswordPage';
 // Store Pages
 import { HomePage } from '../features/home/pages/HomePage';
@@ -41,6 +42,7 @@ export const AppRouter = () => {
         {/* Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
 
