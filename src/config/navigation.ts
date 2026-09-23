@@ -12,7 +12,7 @@ export const DASHBOARD_NAVIGATION: NavItem[] = [
   {
     name: 'Dashboard',
     path: '/dashboard',
-    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO, ROL.CAJERO],
+    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
   },
   {
     name: 'Productos',

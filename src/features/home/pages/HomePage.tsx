@@ -36,15 +36,15 @@ export const HomePage = () => {
       {/* HERO SECTION */}
       <section className="hero-section">
         <div className="hero-content">
-          <span className="hero-subtitle">Nueva Coleccin</span>
-          <h1 className="hero-title">Elegancia para tu da a da</h1>
-          
+          <span className="hero-subtitle">Nueva Coleccion</span>
+          <h1 className="hero-title">Moda que trasciende épocas</h1>
+
           <div className="hero-image-placeholder">
             [Imagen de Coleccin]
           </div>
-          
+
           <p className="hero-text">Descubre nuestra nueva coleccin diseada para resaltar tu estilo en cualquier ocasin.</p>
-          <button 
+          <button
             className="btn-primary"
             onClick={() => navigate('/catalog')}
           >
@@ -66,7 +66,7 @@ export const HomePage = () => {
           <div className="products-grid">
             {featuredProducts.map(p => (
               <div key={p.id} className="product-card">
-                <div 
+                <div
                   className="product-image-placeholder"
                   onClick={() => navigate(`/products/${p.id}`)}
                   style={{ padding: p.imageUrl ? 0 : undefined, overflow: 'hidden' }}
@@ -79,7 +79,7 @@ export const HomePage = () => {
                 </div>
                 <h3 className="product-name">{p.name}</h3>
                 <p className="product-price">Bs. {Number(p.price).toFixed(2)}</p>
-                <button 
+                <button
                   className="btn-outline"
                   onClick={() => navigate(`/products/${p.id}`)}
                 >
