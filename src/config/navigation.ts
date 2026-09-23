@@ -1,10 +1,10 @@
 import { ROL } from '../types/roles';
-import type { RolId } from '../types/roles';
+import type { Rol } from '../types/roles';
 
 export interface NavItem {
   name: string;
   path: string;
-  allowedRoles: RolId[];
+  allowedRoles: Rol[];
   icon?: string;
 }
 
@@ -17,13 +17,9 @@ export const DASHBOARD_NAVIGATION: NavItem[] = [
   {
     name: 'Productos',
     path: '/dashboard/products',
-    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO, ROL.CAJERO],
+    allowedRoles: [ROL.ADMIN],
   },
-  {
-    name: 'Punto de Venta',
-    path: '/dashboard/pos',
-    allowedRoles: [ROL.CAJERO],
-  },
+
   {
     name: 'Inventario',
     path: '/dashboard/inventory',
@@ -47,7 +43,7 @@ export const DASHBOARD_NAVIGATION: NavItem[] = [
   {
     name: 'Usuarios',
     path: '/dashboard/users',
-    allowedRoles: [ROL.ADMIN],
+    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
   },
   {
     name: 'Reportes',

@@ -1,5 +1,5 @@
 import { ROL } from '../types/roles';
-import type { RolId } from '../types/roles';
+import type { Rol } from '../types/roles';
 
 export const PERMISSIONS = {
   MANAGE_PRODUCTS: [ROL.ADMIN, ROL.ENCARGADO],
@@ -23,6 +23,6 @@ export const PERMISSIONS = {
   VIEW_REPORTS: [ROL.ADMIN],
 };
 
-export const hasPermission = (userRoleId: RolId, requiredRoles: RolId[]) => {
-  return requiredRoles.includes(userRoleId);
+export const hasPermission = (userRoles: Rol[] = [], requiredRoles: Rol[]) => {
+  return userRoles.some(role => requiredRoles.includes(role));
 };

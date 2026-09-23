@@ -1,8 +1,8 @@
 export const ROL = {
-  ADMIN: 1,
-  CLIENTE: 2,
-  ENCARGADO: 3,
-  CAJERO: 4,
+  ADMIN: 'ADMIN',
+  CLIENTE: 'CLIENTE',
+  ENCARGADO: 'ENCARGADO',
+  CAJERO: 'CAJERO',
 } as const;
 
-export type RolId = typeof ROL[keyof typeof ROL];
+export type Rol = typeof ROL[keyof typeof ROL];
