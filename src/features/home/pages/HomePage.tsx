@@ -78,7 +78,7 @@ export const HomePage = () => {
                   )}
                 </div>
                 <h3 className="product-name">{p.name}</h3>
-                <p className="product-price">Bs. {p.price.toFixed(2)}</p>
+                <p className="product-price">Bs. {Number(p.price).toFixed(2)}</p>
                 <button 
                   className="btn-outline"
                   onClick={() => navigate(`/products/${p.id}`)}

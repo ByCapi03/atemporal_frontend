@@ -17,6 +17,9 @@ interface ProductDetail {
   price: number;
   categoryName: string;
   imageUrl: string | null;
+  arEnabled?: boolean;
+  arImageUrl?: string | null;
+  arType?: string | null;
   variants: VariantInfo[];
 }
 
@@ -133,7 +136,7 @@ export const ProductDetailPage = () => {
         <button onClick={() => navigate('/catalog')} style={{ background: 'none', border: 'none', color: '#0056b3', cursor: 'pointer', padding: 0, marginBottom: '20px' }}>&larr; Volver al catlogo</button>
         <span style={{ fontSize: '0.9rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.categoryName}</span>
         <h1 style={{ fontSize: '2.5rem', margin: '10px 0', color: '#333' }}>{product.name}</h1>
-        <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0056b3', marginBottom: '30px' }}>Bs. {product.price.toFixed(2)}</p>
+        <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0056b3', marginBottom: '30px' }}>Bs. {Number(product.price).toFixed(2)}</p>
 
         {/* Color Selection */}
         <div style={{ marginBottom: '20px' }}>
@@ -237,6 +240,7 @@ export const ProductDetailPage = () => {
                   </div>
                 )}
                 
+                
                 {selectedVariant && selectedBranchId && (
                   <button 
                     style={{ width: '100%', padding: '15px', backgroundColor: '#333', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}
@@ -254,6 +258,16 @@ export const ProductDetailPage = () => {
                     })}
                   >
                     Reservar Prenda
+                  </button>
+                )}
+
+                {/* Virtual Try-On Button */}
+                {selectedVariant && product.arEnabled && product.arImageUrl && (
+                  <button 
+                    style={{ width: '100%', padding: '15px', backgroundColor: '#e83e8c', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}
+                    onClick={() => navigate(`/try-on/${selectedVariant.id}`)}
+                  >
+                    ✨ Probar virtualmente
                   </button>
                 )}
               </>

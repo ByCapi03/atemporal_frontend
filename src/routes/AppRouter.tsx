@@ -23,6 +23,7 @@ import { CartPage } from '../features/cart/CartPage';
 import { CheckoutPage } from '../features/checkout/pages/CheckoutPage';
 import { OrdersPage } from '../features/orders/pages/OrdersPage';
 import { OrderDetailPage } from '../features/orders/pages/OrderDetailPage';
+import { TryOnPage } from '../features/try-on/pages/TryOnPage';
 
 // Backoffice Pages
 import { DashboardPage } from '../features/home/pages/DashboardPage';
@@ -31,6 +32,8 @@ import { InventoryAdminPage } from '../features/inventory/pages/InventoryAdminPa
 // BranchesAdminPage removed
 import { ReservationsAdminPage } from '../features/reservations/pages/ReservationsAdminPage';
 import { SalesAdminPage } from '../features/sales/pages/SalesAdminPage';
+import { PosDashboardPage } from '../features/sales/pages/PosDashboardPage';
+import { PosTerminalPage } from '../features/sales/pages/PosTerminalPage';
 import { UsersPage } from '../features/dashboard/pages/UsersPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
 import { SuppliersPage } from '../features/suppliers/SuppliersPage';
@@ -51,6 +54,7 @@ export const AppRouter = () => {
           <Route index element={<HomePage />} />
           <Route path="catalog" element={<CatalogPage />} />
           <Route path="products/:id" element={<ProductDetailPage />} />
+          <Route path="try-on/:variantId" element={<TryOnPage />} />
           <Route path="reservations" element={<ReservationsPage />} />
           <Route path="reservations/new" element={<CreateReservationPage />} />
           <Route path="cart" element={<CartPage />} />
@@ -79,6 +83,8 @@ export const AppRouter = () => {
             <Route path="branches" element={<BranchesPage />} />
             <Route path="reservations" element={<ReservationsAdminPage />} />
             <Route path="sales" element={<SalesAdminPage />} />
+            <Route path="pos" element={<PosDashboardPage />} />
+            <Route path="pos/terminal" element={<PosTerminalPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="suppliers" element={<SuppliersPage />} />

@@ -33,7 +33,12 @@ export const DASHBOARD_NAVIGATION: NavItem[] = [
   {
     name: 'Ventas',
     path: '/dashboard/sales',
-    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO, ROL.CAJERO],
+    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
+  },
+  {
+    name: 'Punto de Venta',
+    path: '/dashboard/pos',
+    allowedRoles: [ROL.CAJERO],
   },
   {
     name: 'Sucursales',
