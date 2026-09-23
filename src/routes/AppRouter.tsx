@@ -10,6 +10,7 @@ import { ROL } from '../types/roles';
 
 // Auth Pages
 import { LoginPage } from '../features/auth/LoginPage';
+import { ChangePasswordPage } from '../features/auth/ChangePasswordPage';
 // Store Pages
 import { HomePage } from '../features/home/pages/HomePage';
 import { CatalogPage } from '../features/catalog/pages/CatalogPage';
@@ -31,6 +32,7 @@ import { ReservationsAdminPage } from '../features/reservations/pages/Reservatio
 import { SalesAdminPage } from '../features/sales/pages/SalesAdminPage';
 import { UsersPage } from '../features/dashboard/pages/UsersPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
+import { SuppliersPage } from '../features/suppliers/SuppliersPage';
 
 export const AppRouter = () => {
   return (
@@ -39,6 +41,7 @@ export const AppRouter = () => {
         {/* Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
 
         {/* Store Routes (Customer Facing) */}
@@ -76,6 +79,7 @@ export const AppRouter = () => {
             <Route path="sales" element={<SalesAdminPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="suppliers" element={<SuppliersPage />} />
           </Route>
         </Route>
       </Routes>

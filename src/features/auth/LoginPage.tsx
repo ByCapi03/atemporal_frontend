@@ -30,14 +30,19 @@ export const LoginPage = () => {
       const { data } = await api.post('/auth/login', formData);
       login(data.accessToken, data.user);
       
-      if (data.user.roles.includes('ADMIN')) {
+      if (data.user.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+        return;
+      }
+      
+      if (data.user.roles.includes('ADMIN') || data.user.roles.includes('ENCARGADO') || data.user.roles.includes('CAJERO')) {
         navigate('/dashboard', { replace: true });
       } else {
         navigate('/', { replace: true });
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        setError('Correo o contraseña incorrectos');
+        setError(err.response?.data?.message || 'Correo o contrasea incorrectos');
       } else {
         setError('Error al intentar iniciar sesión');
       }

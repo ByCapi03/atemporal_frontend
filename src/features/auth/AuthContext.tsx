@@ -7,6 +7,7 @@ export interface User {
   email: string;
   roles: string[];
   branchId?: number | null;
+  mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (token: string, userData: User) => void;
   logout: () => void;
+  updateUser: (userData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,10 +39,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const updateUser = (newUser: User) => {
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
   const isAuthenticated = !!accessToken;
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, accessToken, isAuthenticated, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

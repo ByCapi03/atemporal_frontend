@@ -33,7 +33,6 @@ export const UsersPage = () => {
   const [form, setForm] = useState({ 
     name: '', 
     email: '', 
-    password: '', 
     roleName: '', 
     branchId: 0, 
     active: true 
@@ -67,7 +66,6 @@ export const UsersPage = () => {
       const payload: any = {
         name: form.name,
         email: form.email,
-        password: form.password,
         active: form.active,
       };
 
@@ -82,11 +80,21 @@ export const UsersPage = () => {
       }
 
       await api.post('/users', payload);
-      setForm({ name: '', email: '', password: '', roleName: '', branchId: 0, active: true });
+      setForm({ name: '', email: '', roleName: '', branchId: 0, active: true });
       setShowForm(false);
       fetchData();
+      alert('Usuario creado correctamente. Se envi una contrasea temporal por correo.');
     } catch (err: any) {
       setError('Error guardando usuario: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleResendPassword = async (id: number) => {
+    try {
+      await api.post(`/users/${id}/resend-temporary-password`);
+      alert('Contrasea temporal reenviada por correo.');
+    } catch (err: any) {
+      setError('Error reenviando contrasea: ' + (err.response?.data?.message || err.message));
     }
   };
 
@@ -111,11 +119,11 @@ export const UsersPage = () => {
           onClick={() => {
             setShowForm(!showForm);
             if (!showForm) {
-              setForm({ name: '', email: '', password: '', roleName: '', branchId: 0, active: true });
+              setForm({ name: '', email: '', roleName: isEncargado ? 'CAJERO' : '', branchId: isEncargado ? (currentUser?.branchId || 0) : 0, active: true });
             }
           }}
         >
-          {showForm ? 'Cancelar' : '+ Nuevo Usuario'}
+          {showForm ? 'Cancelar' : (isEncargado ? '+ Nuevo Cajero' : '+ Nuevo Usuario')}
         </button>
       </div>
 
@@ -131,10 +139,6 @@ export const UsersPage = () => {
             <div className="form-group">
               <label>Correo</label>
               <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label>Contraseña</label>
-              <input type="password" required minLength={6} value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
             </div>
 
             {isAdmin && (
@@ -153,6 +157,13 @@ export const UsersPage = () => {
               <div className="form-group">
                 <label>Rol</label>
                 <input type="text" disabled value="Cajero" />
+              </div>
+            )}
+
+            {isEncargado && (
+              <div className="form-group">
+                <label>Sucursal</label>
+                <input type="text" disabled value={branches.find(b => b.id === currentUser?.branchId)?.name || 'Tu Sucursal'} />
               </div>
             )}
 
@@ -206,6 +217,7 @@ export const UsersPage = () => {
                 </td>
                 <td>
                   <div className="crud-actions">
+                    <button className="btn-secondary" onClick={() => handleResendPassword(u.id)}>Reenviar Acceso</button>
                     <button className="btn-danger" onClick={() => handleDelete(u.id)}>Eliminar</button>
                   </div>
                 </td>

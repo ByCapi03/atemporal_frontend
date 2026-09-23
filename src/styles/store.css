@@ -1,0 +1,239 @@
+/* store.css - Estilos para la tienda pblica */
+
+/* Navbar */
+.store-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.store-navbar-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  letter-spacing: 2px;
+}
+
+.store-navbar-logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.store-navbar-links {
+  display: flex;
+  gap: 30px;
+}
+
+.store-navbar-links a {
+  text-decoration: none;
+  color: #555;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+
+.store-navbar-links a:hover {
+  color: #000;
+}
+
+/* Footer */
+.store-footer {
+  background-color: #222;
+  color: #fff;
+  padding: 40px 20px;
+  text-align: center;
+  margin-top: auto;
+}
+
+.store-footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.store-footer-logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.store-footer-links {
+  display: flex;
+  gap: 20px;
+  color: #aaa;
+}
+
+.store-footer-links a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.store-footer-links a:hover {
+  color: #fff;
+}
+
+.store-footer-copyright {
+  margin: 30px 0 0 0;
+  letter-spacing: 1px;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* HomePage */
+.home-page {
+  padding: 0 0 60px 0;
+}
+
+/* Hero Section */
+.hero-section {
+  background-color: #f8f9fa;
+  padding: 80px 20px;
+  text-align: center;
+  margin-bottom: 60px;
+  border-bottom: 1px solid #eee;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin: 20px 0;
+  color: #222;
+  letter-spacing: 1px;
+}
+
+.hero-image-placeholder {
+  width: 100%;
+  height: 400px;
+  background-color: #ddd;
+  border-radius: 8px;
+  margin: 40px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 1.2rem;
+  background-image: linear-gradient(45deg, #f3f3f3 25%, #ececec 25%, #ececec 50%, #f3f3f3 50%, #f3f3f3 75%, #ececec 75%, #ececec 100%);
+  background-size: 40px 40px;
+}
+
+.hero-text {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.btn-primary {
+  padding: 15px 40px;
+  background-color: #222;
+  color: #fff;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #000;
+}
+
+/* Featured Products */
+.featured-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 2rem;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background-color: #333;
+  margin: 15px auto 0;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.product-card {
+  text-align: center;
+}
+
+.product-image-placeholder {
+  height: 300px;
+  background-color: #f1f1f1;
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  transition: transform 0.3s ease;
+}
+
+.product-image-placeholder:hover {
+  transform: scale(1.02);
+}
+
+.product-name {
+  font-size: 1.2rem;
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.product-price {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.btn-outline {
+  padding: 8px 20px;
+  background-color: transparent;
+  border: 1px solid #333;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: #333;
+  color: #fff;
+}
