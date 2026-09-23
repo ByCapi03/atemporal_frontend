@@ -2,17 +2,17 @@
     display: flex;
     width: 1000px;
     height: 600px;
-    background-color: #fff;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(28, 42, 40, 0.15);
+    background-color: var(--atemporal-white);
+    border-radius: var(--radius-lg, 20px);
+    box-shadow: var(--atemporal-shadow);
     overflow: hidden;
 }
 
 .login-left {
     flex: 1;
-    background: linear-gradient(135deg, rgba(28, 42, 40, 0.9), rgba(28, 42, 40, 0.95)), 
+    background: linear-gradient(135deg, rgba(24, 45, 42, 0.9), rgba(16, 36, 33, 0.95)), 
                 url('https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80') center/cover;
-    color: #fff;
+    color: var(--atemporal-cream);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -29,13 +29,14 @@
     font-size: 3rem;
     font-weight: 600;
     margin-bottom: 15px;
-    color: #ba8141;
+    color: var(--atemporal-gold);
 }
 
 .brand-info p {
     font-size: 1.2rem;
     font-weight: 300;
     opacity: 0.9;
+    color: var(--atemporal-beige);
 }
 
 .login-right {
@@ -44,6 +45,7 @@
     justify-content: center;
     align-items: center;
     padding: 50px;
+    background-color: var(--atemporal-cream);
 }
 
 .login-box {
@@ -53,12 +55,12 @@
 
 .login-box h2 {
     font-size: 2rem;
-    color: #1c2a28;
+    color: var(--atemporal-green);
     margin-bottom: 8px;
 }
 
 .subtitle {
-    color: #666;
+    color: var(--atemporal-muted);
     margin-bottom: 30px;
     font-size: 0.95rem;
 }
@@ -71,26 +73,27 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #1c2a28;
+    color: var(--atemporal-green-dark);
     font-size: 0.9rem;
 }
 
 .input-group input {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #e0e0e0;
-    background-color: #f9f9f9;
-    border-radius: 8px;
+    border: 1px solid var(--atemporal-border);
+    background-color: var(--atemporal-white);
+    border-radius: var(--radius-sm, 8px);
     font-size: 1rem;
-    font-family: 'Outfit', sans-serif;
+    font-family: inherit;
     transition: all 0.3s ease;
+    color: var(--atemporal-text);
 }
 
 .input-group input:focus {
     outline: none;
-    border-color: #ba8141;
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(186, 129, 65, 0.1);
+    border-color: var(--atemporal-gold);
+    background-color: var(--atemporal-white);
+    box-shadow: 0 0 0 3px rgba(201, 144, 74, 0.15);
 }
 
 .options {
@@ -109,38 +112,38 @@
 
 .remember input {
     margin-right: 8px;
-    accent-color: #ba8141;
+    accent-color: var(--atemporal-gold);
 }
 
 .forgot-password {
-    color: #ba8141;
+    color: var(--atemporal-gold);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .forgot-password:hover {
-    color: #9a6831;
+    color: var(--atemporal-beige);
 }
 
 .btn-login {
     width: 100%;
     padding: 14px;
-    background-color: #1c2a28;
-    color: #fff;
+    background-color: var(--atemporal-green);
+    color: var(--atemporal-cream);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Outfit', sans-serif;
+    font-family: inherit;
     transition: all 0.3s ease;
 }
 
 .btn-login:hover:not(:disabled) {
-    background-color: #141e1c;
+    background-color: var(--atemporal-green-dark);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(28, 42, 40, 0.3);
+    box-shadow: var(--atemporal-shadow);
 }
 
 .btn-login:active:not(:disabled) {
@@ -156,18 +159,18 @@
     margin-top: 25px;
     text-align: center;
     font-size: 0.95rem;
-    color: #666;
+    color: var(--atemporal-muted);
 }
 
 .register-link a {
-    color: #ba8141;
+    color: var(--atemporal-gold);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .register-link a:hover {
-    color: #9a6831;
+    color: var(--atemporal-beige);
     text-decoration: underline;
 }
 

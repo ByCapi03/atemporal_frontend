@@ -22,9 +22,8 @@ export const Navbar = () => {
       <div className="store-navbar-links">
         <Link to="/">Inicio</Link>
         <Link to="/catalog">Catálogo</Link>
-        {isAuthenticated && <Link to="/reservations">Mis Reservas</Link>}
         <Link to="/cart">Carrito {totalItems > 0 ? `(${totalItems})` : ''}</Link>
-        <Link to="/login">Mi Cuenta</Link>
+        <Link to={isAuthenticated ? "/account" : "/login"}>Mi Cuenta</Link>
       </div>
     </nav>
   );

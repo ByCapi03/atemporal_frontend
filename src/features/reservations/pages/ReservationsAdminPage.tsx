@@ -7,6 +7,8 @@ export const ReservationsAdminPage = () => {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isCajero = user?.roles?.includes('CAJERO') && !user.roles.includes('ADMIN') && !user.roles.includes('ENCARGADO');
+
   const fetchReservations = async () => {
     try {
       const { data } = await api.get('/reservations');
@@ -56,7 +58,8 @@ export const ReservationsAdminPage = () => {
   return (
     <div style={{ padding: '20px' }}>
       <h1 style={{ fontSize: '1.8rem', marginBottom: '20px', color: '#333' }}>
-        Administracin de Reservas {user?.roles.includes('ENCARGADO') && !user.roles.includes('ADMIN') ? '(Mi Sucursal)' : ''}
+        Administración de Reservas {user?.roles?.includes('ENCARGADO') && !user.roles.includes('ADMIN') ? '(Mi Sucursal)' : ''}
+        {isCajero ? ' (Solo Lectura)' : ''}
       </h1>
 
       <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
@@ -70,9 +73,9 @@ export const ReservationsAdminPage = () => {
                 <th style={{ padding: '12px 8px', color: '#555' }}>Cliente</th>
                 <th style={{ padding: '12px 8px', color: '#555' }}>Sucursal</th>
                 <th style={{ padding: '12px 8px', color: '#555' }}>Recojo</th>
-                <th style={{ padding: '12px 8px', color: '#555' }}>Artculos</th>
+                <th style={{ padding: '12px 8px', color: '#555' }}>Artículos</th>
                 <th style={{ padding: '12px 8px', color: '#555' }}>Estado Actual</th>
-                <th style={{ padding: '12px 8px', color: '#555' }}>Acciones</th>
+                {!isCajero && <th style={{ padding: '12px 8px', color: '#555' }}>Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -96,28 +99,30 @@ export const ReservationsAdminPage = () => {
                       {res.status}
                     </span>
                   </td>
-                  <td style={{ padding: '12px 8px' }}>
-                    {res.status !== 'CANCELADA' && res.status !== 'ATENDIDA' && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <select 
-                          value=""
-                          onChange={(e) => handleUpdateStatus(res.id, e.target.value)}
-                          style={{ padding: '4px', borderRadius: '4px', border: '1px solid #ccc' }}
-                        >
-                          <option value="" disabled>Avanzar estado...</option>
-                          {getNextStatuses(res.status).map(s => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
-                        <button 
-                          onClick={() => handleUpdateStatus(res.id, 'CANCELADA')}
-                          style={{ padding: '4px', backgroundColor: '#fff', border: '1px solid #dc3545', color: '#dc3545', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    )}
-                  </td>
+                  {!isCajero && (
+                    <td style={{ padding: '12px 8px' }}>
+                      {res.status !== 'CANCELADA' && res.status !== 'ATENDIDA' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                          <select 
+                            value=""
+                            onChange={(e) => handleUpdateStatus(res.id, e.target.value)}
+                            style={{ padding: '4px', borderRadius: '4px', border: '1px solid #ccc' }}
+                          >
+                            <option value="" disabled>Avanzar estado...</option>
+                            {getNextStatuses(res.status).map(s => (
+                              <option key={s} value={s}>{s}</option>
+                            ))}
+                          </select>
+                          <button 
+                            onClick={() => handleUpdateStatus(res.id, 'CANCELADA')}
+                            style={{ padding: '4px', backgroundColor: '#fff', border: '1px solid #dc3545', color: '#dc3545', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

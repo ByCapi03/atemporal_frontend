@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../api/axios';
+import atemporalLogo from '../../../assets/ATEMPORAL.png';
 import '../../../styles/store.css';
 
 interface Product {
@@ -35,20 +36,22 @@ export const HomePage = () => {
     <div className="home-page">
       {/* HERO SECTION */}
       <section className="hero-section">
-        <div className="hero-content">
-          <span className="hero-subtitle">Nueva Coleccion</span>
+        <div className="hero-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img 
+            src={atemporalLogo} 
+            alt="ATEMPORAL - Moda que trasciende épocas" 
+            style={{ maxWidth: '280px', width: '100%', height: 'auto', objectFit: 'contain', marginBottom: '20px', borderRadius: '12px' }} 
+          />
+          <span className="hero-subtitle">NUEVA COLECCIÓN</span>
           <h1 className="hero-title">Moda que trasciende épocas</h1>
 
-          <div className="hero-image-placeholder">
-            [Imagen de Coleccin]
-          </div>
-
-          <p className="hero-text">Descubre nuestra nueva coleccin diseada para resaltar tu estilo en cualquier ocasin.</p>
+          <p className="hero-text">Descubre nuestra nueva colección diseñada para resaltar tu estilo en cualquier ocasión.</p>
           <button
-            className="btn-primary"
+            className="btn-secondary"
             onClick={() => navigate('/catalog')}
+            style={{ marginTop: '10px' }}
           >
-            Ver Catlogo
+            Ver Catálogo
           </button>
         </div>
       </section>

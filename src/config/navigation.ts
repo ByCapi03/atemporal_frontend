@@ -28,7 +28,7 @@ export const DASHBOARD_NAVIGATION: NavItem[] = [
   {
     name: 'Reservas',
     path: '/dashboard/reservations',
-    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
+    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO, ROL.CAJERO],
   },
   {
     name: 'Ventas',

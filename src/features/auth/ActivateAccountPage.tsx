@@ -10,7 +10,7 @@ export const ActivateAccountPage = () => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -56,91 +56,109 @@ export const ActivateAccountPage = () => {
 
   return (
     <div className="login-container">
-      <div className="login-card" style={{ maxWidth: '400px' }}>
-        <div className="login-header">
-          <h2>Activar Cuenta</h2>
-          <p>
-            {step === 1 
-              ? 'Ingresa tu correo para recibir un código de activación' 
-              : 'Ingresa el código que enviamos a tu correo'}
-          </p>
+      <div className="login-left">
+        <div className="brand-info" style={{ textAlign: 'center' }}>
+          <img
+
+            alt="ATEMPORAL - Moda que trasciende épocas"
+            style={{ maxWidth: '240px', width: '100%', height: 'auto', objectFit: 'contain', marginBottom: '15px', borderRadius: '8px' }}
+          />
+          <h1>ATEMPORAL</h1>
+          <p>Moda que trasciende épocas.</p>
         </div>
+      </div>
+      <div className="login-right">
+        <div className="login-box">
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <img
 
-        {error && <div className="error-alert">{error}</div>}
-        {success && <div style={{ color: '#155724', backgroundColor: '#d4edda', padding: '10px', borderRadius: '4px', marginBottom: '15px' }}>{success}</div>}
+              alt="ATEMPORAL"
+              style={{ maxHeight: '70px', width: 'auto', objectFit: 'contain', borderRadius: '6px' }}
+            />
+            <h2 style={{ marginTop: '10px' }}>Activar Cuenta</h2>
+            <p className="subtitle">
+              {step === 1
+                ? 'Ingresa tu correo para recibir un código de activación'
+                : 'Ingresa el código que enviamos a tu correo'}
+            </p>
+          </div>
 
-        {step === 1 ? (
-          <form className="login-form" onSubmit={handleRequestCode}>
-            <div className="form-group">
-              <label>Correo Electrónico</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@ejemplo.com"
-                required
-              />
-            </div>
+          {error && <div style={{ color: '#991b1b', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>{error}</div>}
+          {success && <div style={{ color: '#065f46', backgroundColor: '#d1fae5', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>{success}</div>}
 
-            <button type="submit" className="login-btn" disabled={loading}>
-              {loading ? 'Solicitando...' : 'Solicitar Código'}
-            </button>
-            
-            <div className="register-link" style={{ marginTop: '15px', textAlign: 'center' }}>
-              <button type="button" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}>
-                Volver al inicio de sesión
+          {step === 1 ? (
+            <form onSubmit={handleRequestCode}>
+              <div className="input-group">
+                <label>Correo Electrónico</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="correo@ejemplo.com"
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn-login" disabled={loading}>
+                {loading ? 'Solicitando...' : 'Solicitar Código'}
               </button>
-            </div>
-          </form>
-        ) : (
-          <form className="login-form" onSubmit={handleActivate}>
-            <div className="form-group">
-              <label>Código de Activación (6 dígitos)</label>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="123456"
-                required
-                maxLength={6}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Nueva Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-            </div>
 
-            <div className="form-group">
-              <label>Confirmar Contraseña</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-            </div>
+              <div className="register-link" style={{ marginTop: '15px', textAlign: 'center' }}>
+                <button type="button" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'var(--atemporal-gold)', cursor: 'pointer', fontWeight: 'bold' }}>
+                  Volver al inicio de sesión
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleActivate}>
+              <div className="input-group">
+                <label>Código de Activación (6 dígitos)</label>
+                <input
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="123456"
+                  required
+                  maxLength={6}
+                />
+              </div>
 
-            <button type="submit" className="login-btn" disabled={loading}>
-              {loading ? 'Activando...' : 'Activar Cuenta'}
-            </button>
-            
-            <div className="register-link" style={{ marginTop: '15px', textAlign: 'center' }}>
-              <button type="button" onClick={() => { setStep(1); setError(null); setSuccess(null); }} style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}>
-                Volver atrás
+              <div className="input-group">
+                <label>Nueva Contraseña</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Confirmar Contraseña</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <button type="submit" className="btn-login" disabled={loading}>
+                {loading ? 'Activando...' : 'Activar Cuenta'}
               </button>
-            </div>
-          </form>
-        )}
+
+              <div className="register-link" style={{ marginTop: '15px', textAlign: 'center' }}>
+                <button type="button" onClick={() => { setStep(1); setError(null); setSuccess(null); }} style={{ background: 'none', border: 'none', color: 'var(--atemporal-gold)', cursor: 'pointer', fontWeight: 'bold' }}>
+                  Volver atrás
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

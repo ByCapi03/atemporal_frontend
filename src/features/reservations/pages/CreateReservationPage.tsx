@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { api } from '../../../api/axios';
 import '../../../styles/store.css';
@@ -6,9 +6,29 @@ import '../../../styles/store.css';
 export const CreateReservationPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as any;
+  
+  let state = location.state as any;
 
   if (!state) {
+    const pendingStr = sessionStorage.getItem('pendingReservation');
+    if (pendingStr) {
+      try {
+        state = JSON.parse(pendingStr);
+      } catch (e) {
+        console.error('Error parsing pending reservation', e);
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (state) {
+      // Solo limpiamos cuando la página cargó exitosamente
+      sessionStorage.removeItem('pendingReservation');
+    }
+  }, [state]);
+
+  if (!state) {
+    alert('No se encontraron los datos de la reserva. Por favor selecciona el producto nuevamente.');
     return <Navigate to="/catalog" />;
   }
 
@@ -16,7 +36,7 @@ export const CreateReservationPage = () => {
 
   const [date, setDate] = useState('');
   const [approximateTime, setApproximateTime] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(state.quantity || 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,8 +57,8 @@ export const CreateReservationPage = () => {
           { variantId, quantity }
         ]
       });
-      alert('Reserva creada con xito!');
-      navigate('/reservations');
+      alert('¡Reserva creada con éxito!');
+      navigate('/account/reservations');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear la reserva');
     } finally {
@@ -55,7 +75,7 @@ export const CreateReservationPage = () => {
           <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>{productName}</h3>
           <p style={{ margin: '5px 0', color: '#666' }}><strong>Talla:</strong> {sizeName} | <strong>Color:</strong> {colorName}</p>
           <p style={{ margin: '5px 0', color: '#666' }}><strong>Sucursal:</strong> {branchName}</p>
-          <p style={{ margin: '15px 0 0 0', fontSize: '1.2rem', fontWeight: 'bold', color: '#0056b3' }}>Bs. {price.toFixed(2)}</p>
+          <p style={{ margin: '15px 0 0 0', fontSize: '1.2rem', fontWeight: 'bold', color: '#0056b3' }}>Bs. {Number(price).toFixed(2)}</p>
         </div>
 
         {error && <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', borderRadius: '4px', marginBottom: '20px' }}>{error}</div>}

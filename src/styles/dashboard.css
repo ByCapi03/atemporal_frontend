@@ -95,6 +95,129 @@
   gap: 15px;
 }
 
+/* Notifications */
+.notification-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: relative;
+  padding: 5px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: var(--be-danger);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid var(--be-surface);
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 320px;
+  background-color: var(--be-surface);
+  border: 1px solid var(--be-border);
+  border-radius: var(--be-radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--be-border);
+  background-color: var(--be-bg);
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--be-primary);
+}
+
+.btn-mark-all {
+  background: none;
+  border: none;
+  color: #0056b3;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.btn-mark-all:hover {
+  text-decoration: underline;
+}
+
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--be-text-light);
+  font-size: 0.9rem;
+}
+
+.notification-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--be-border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background-color: var(--be-bg);
+}
+
+.notification-item.unread {
+  background-color: #f0f7ff;
+}
+
+.notification-item.unread:hover {
+  background-color: #e6f0fa;
+}
+
+.notification-title {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 3px;
+  color: var(--be-text);
+}
+
+.notification-msg {
+  font-size: 0.85rem;
+  color: var(--be-text-light);
+  margin-bottom: 5px;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #999;
+}
+
 /* Dashboard Sidebar */
 .dashboard-sidebar {
   width: 250px;

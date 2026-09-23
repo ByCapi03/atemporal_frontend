@@ -223,14 +223,14 @@ export const ProductDetailPage = () => {
 
       {/* Product Info & Selection */}
       <div style={{ flex: '1 1 400px' }}>
-        <button onClick={() => navigate('/catalog')} style={{ background: 'none', border: 'none', color: '#0056b3', cursor: 'pointer', padding: 0, marginBottom: '20px' }}>&larr; Volver al catálogo</button>
-        <span style={{ display: 'block', fontSize: '0.9rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.categoryName}</span>
-        <h1 style={{ fontSize: '2.5rem', margin: '10px 0', color: '#333' }}>{product.name}</h1>
-        <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0056b3', marginBottom: '30px' }}>Bs. {Number(product.price).toFixed(2)}</p>
+        <button onClick={() => navigate('/catalog')} style={{ background: 'none', border: 'none', color: 'var(--atemporal-gold)', cursor: 'pointer', padding: 0, marginBottom: '20px', fontWeight: 'bold' }}>&larr; Volver al catálogo</button>
+        <span style={{ display: 'block', fontSize: '0.9rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.categoryName}</span>
+        <h1 style={{ fontSize: '2.5rem', margin: '10px 0', color: 'var(--atemporal-green)' }}>{product.name}</h1>
+        <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--atemporal-gold)', marginBottom: '30px' }}>Bs. {Number(product.price).toFixed(2)}</p>
 
         {/* Color Selection */}
         <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ marginBottom: '10px', color: '#555' }}>Color</h4>
+          <h4 style={{ marginBottom: '10px', color: 'var(--atemporal-green-dark)' }}>Color</h4>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             {uniqueColors.map(v => (
               <button
@@ -238,8 +238,9 @@ export const ProductDetailPage = () => {
                 onClick={() => setSelectedColorId(selectedColorId === v.colorId ? null : v.colorId)}
                 style={{
                   padding: '8px 16px',
-                  border: selectedColorId === v.colorId ? '2px solid #333' : '1px solid #ddd',
-                  backgroundColor: selectedColorId === v.colorId ? '#f0f0f0' : '#fff',
+                  border: selectedColorId === v.colorId ? '2px solid var(--atemporal-green)' : '1px solid var(--atemporal-border)',
+                  backgroundColor: selectedColorId === v.colorId ? 'var(--atemporal-cream)' : 'var(--atemporal-white)',
+                  color: 'var(--atemporal-text)',
                   borderRadius: '4px',
                   cursor: 'pointer'
                 }}
@@ -252,7 +253,7 @@ export const ProductDetailPage = () => {
 
         {/* Size Selection */}
         <div style={{ marginBottom: '30px' }}>
-          <h4 style={{ marginBottom: '10px', color: '#555' }}>Talla</h4>
+          <h4 style={{ marginBottom: '10px', color: 'var(--atemporal-green-dark)' }}>Talla</h4>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             {uniqueSizes.map(v => (
               <button
@@ -260,8 +261,9 @@ export const ProductDetailPage = () => {
                 onClick={() => setSelectedSizeId(selectedSizeId === v.sizeId ? null : v.sizeId)}
                 style={{
                   padding: '8px 16px',
-                  border: selectedSizeId === v.sizeId ? '2px solid #333' : '1px solid #ddd',
-                  backgroundColor: selectedSizeId === v.sizeId ? '#f0f0f0' : '#fff',
+                  border: selectedSizeId === v.sizeId ? '2px solid var(--atemporal-green)' : '1px solid var(--atemporal-border)',
+                  backgroundColor: selectedSizeId === v.sizeId ? 'var(--atemporal-cream)' : 'var(--atemporal-white)',
+                  color: 'var(--atemporal-text)',
                   borderRadius: '4px',
                   cursor: 'pointer'
                 }}
@@ -289,7 +291,7 @@ export const ProductDetailPage = () => {
                   <select 
                     value={selectedCityId || ''} 
                     onChange={e => handleCityChange(e.target.value ? Number(e.target.value) : null)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    className="form-select"
                   >
                     <option value="">Seleccione una ciudad...</option>
                     {uniqueCities.map(c => <option key={c.cityId} value={c.cityId}>{c.cityName}</option>)}
@@ -307,25 +309,25 @@ export const ProductDetailPage = () => {
                           onClick={() => handleBranchSelect(b.branchId)}
                           style={{
                             padding: '15px',
-                            border: selectedBranchId === b.branchId ? '2px solid #0056b3' : '1px solid #ddd',
+                            border: selectedBranchId === b.branchId ? '2px solid var(--atemporal-green)' : '1px solid var(--atemporal-border)',
                             borderRadius: '8px',
                             cursor: 'pointer',
-                            backgroundColor: selectedBranchId === b.branchId ? '#f0f7ff' : '#fff',
+                            backgroundColor: selectedBranchId === b.branchId ? 'var(--atemporal-cream)' : 'var(--atemporal-white)',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center'
                           }}
                         >
                           <div>
-                            <span style={{ fontWeight: 'bold', display: 'block' }}>{b.branchName}</span>
-                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Disponible: {b.available} unidades</span>
+                            <span style={{ fontWeight: 'bold', display: 'block', color: 'var(--atemporal-green-dark)' }}>{b.branchName}</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--atemporal-muted)' }}>Disponible: {b.available} unidades</span>
                           </div>
                           <span style={{ 
                             fontSize: '0.85rem', 
                             padding: '4px 8px', 
                             borderRadius: '12px', 
-                            backgroundColor: b.status === 'AVAILABLE' ? '#dff0d8' : '#fcf8e3',
-                            color: b.status === 'AVAILABLE' ? '#3c763d' : '#8a6d3b'
+                            backgroundColor: b.status === 'AVAILABLE' ? 'var(--atemporal-green-soft)' : '#fcf8e3',
+                            color: b.status === 'AVAILABLE' ? 'var(--atemporal-cream)' : '#8a6d3b'
                           }}>
                             {b.status === 'AVAILABLE' ? 'Disponible' : 'Pocas Unidades'}
                           </span>
@@ -383,15 +385,12 @@ export const ProductDetailPage = () => {
                   <button 
                     disabled={isActionDisabled}
                     onClick={handleReserve}
+                    className="btn-primary"
                     style={{ 
                       width: '100%', 
                       padding: '15px', 
-                      backgroundColor: isActionDisabled ? '#ccc' : '#333', 
-                      color: '#fff', 
-                      border: 'none', 
-                      borderRadius: '4px', 
                       fontSize: '1.05rem', 
-                      fontWeight: 'bold', 
+                      opacity: isActionDisabled ? 0.5 : 1,
                       cursor: isActionDisabled ? 'not-allowed' : 'pointer' 
                     }}
                   >
@@ -401,15 +400,12 @@ export const ProductDetailPage = () => {
                   <button 
                     disabled={isActionDisabled}
                     onClick={handleAddToCart}
+                    className="btn-secondary"
                     style={{ 
                       width: '100%', 
                       padding: '15px', 
-                      backgroundColor: isActionDisabled ? '#e0e0e0' : '#0056b3', 
-                      color: isActionDisabled ? '#888' : '#fff', 
-                      border: 'none', 
-                      borderRadius: '4px', 
                       fontSize: '1.05rem', 
-                      fontWeight: 'bold', 
+                      opacity: isActionDisabled ? 0.5 : 1,
                       cursor: isActionDisabled ? 'not-allowed' : 'pointer' 
                     }}
                   >
@@ -423,10 +419,12 @@ export const ProductDetailPage = () => {
 
         {/* Divider & Virtual Try-On Button (Independent of branch/city/quantity) */}
         {selectedVariant && product.arEnabled && product.arType && (product.arImageUrl || product.imageUrl) && (
-          <div style={{ borderTop: '1px solid #eee', marginTop: '25px', paddingTop: '20px' }}>
+          <div style={{ borderTop: '1px solid var(--atemporal-border)', marginTop: '25px', paddingTop: '20px' }}>
             <button 
-              style={{ width: '100%', padding: '15px', backgroundColor: '#e83e8c', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}
+              style={{ width: '100%', padding: '15px', backgroundColor: 'var(--atemporal-gold)', color: 'var(--atemporal-white)', border: 'none', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.3s' }}
               onClick={() => navigate(`/try-on/${selectedVariant.id}`)}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'var(--atemporal-beige)'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'var(--atemporal-gold)'}
             >
               ✨ Probar virtualmente
             </button>

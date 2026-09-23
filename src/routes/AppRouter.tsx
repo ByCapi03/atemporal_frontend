@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { StoreLayout } from '../layouts/StoreLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { ClientAccountLayout } from '../layouts/ClientAccountLayout';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
 
 import { ROL } from '../types/roles';
@@ -18,19 +19,21 @@ import { HomePage } from '../features/home/pages/HomePage';
 import { CatalogPage } from '../features/catalog/pages/CatalogPage';
 import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage';
 import { BranchesPage } from '../features/branches/BranchesPage';
-import { ReservationsPage } from '../features/reservations/pages/ReservationsPage';
 import { CreateReservationPage } from '../features/reservations/pages/CreateReservationPage';
 import { CartPage } from '../features/cart/CartPage';
 import { CheckoutPage } from '../features/checkout/pages/CheckoutPage';
+import { TryOnPage } from '../features/try-on/pages/TryOnPage';
+
+// Account Pages
+import { AccountProfile } from '../features/account/AccountProfile';
+import { ReservationsPage } from '../features/reservations/pages/ReservationsPage';
 import { OrdersPage } from '../features/orders/pages/OrdersPage';
 import { OrderDetailPage } from '../features/orders/pages/OrderDetailPage';
-import { TryOnPage } from '../features/try-on/pages/TryOnPage';
 
 // Backoffice Pages
 import { DashboardPage } from '../features/home/pages/DashboardPage';
 import { ProductsAdminPage } from '../features/catalog/pages/ProductsAdminPage';
 import { InventoryAdminPage } from '../features/inventory/pages/InventoryAdminPage';
-// BranchesAdminPage removed
 import { ReservationsAdminPage } from '../features/reservations/pages/ReservationsAdminPage';
 import { SalesAdminPage } from '../features/sales/pages/SalesAdminPage';
 import { PosDashboardPage } from '../features/sales/pages/PosDashboardPage';
@@ -57,12 +60,24 @@ export const AppRouter = () => {
           <Route path="catalog" element={<CatalogPage />} />
           <Route path="products/:id" element={<ProductDetailPage />} />
           <Route path="try-on/:variantId" element={<TryOnPage />} />
-          <Route path="reservations" element={<ReservationsPage />} />
           <Route path="reservations/new" element={<CreateReservationPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="orders/:id" element={<OrderDetailPage />} />
+        </Route>
+
+        {/* Client Account Routes */}
+        <Route 
+          path="/account" 
+          element={
+            <ProtectedRoute allowedRoles={[ROL.CLIENTE]} />
+          }
+        >
+          <Route element={<ClientAccountLayout />}>
+            <Route index element={<AccountProfile />} />
+            <Route path="reservations" element={<ReservationsPage />} />
+            <Route path="purchases" element={<OrdersPage />} />
+            <Route path="purchases/:id" element={<OrderDetailPage />} />
+          </Route>
         </Route>
 
         {/* Dashboard Routes (Internal Personnel) */}

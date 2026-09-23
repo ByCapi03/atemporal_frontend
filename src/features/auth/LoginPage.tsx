@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/axios';
 import { useAuth } from './AuthContext';
+import atemporalLogo from '../../assets/ATEMPORAL.png';
 import '../../styles/login.css';
 
 export const LoginPage = () => {
@@ -40,7 +41,6 @@ export const LoginPage = () => {
       } else {
         const pendingReservationStr = sessionStorage.getItem('pendingReservation');
         if (pendingReservationStr) {
-          sessionStorage.removeItem('pendingReservation');
           try {
             const pendingReservation = JSON.parse(pendingReservationStr);
             navigate('/reservations/new', { state: pendingReservation, replace: true });
@@ -57,11 +57,11 @@ export const LoginPage = () => {
           return;
         }
 
-        navigate('/', { replace: true });
+        navigate('/account', { replace: true });
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        setError(err.response?.data?.message || 'Correo o contrasea incorrectos');
+        setError(err.response?.data?.message || 'Correo o contraseña incorrectos');
       } else {
         setError('Error al intentar iniciar sesión');
       }
@@ -73,15 +73,23 @@ export const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="login-left">
-        <div className="brand-info">
+        <div className="brand-info" style={{ textAlign: 'center' }}>
+          <img
+            src={atemporalLogo}
+            alt="ATEMPORAL - Moda que trasciende épocas"
+            style={{ maxWidth: '240px', width: '100%', height: 'auto', objectFit: 'contain', marginBottom: '15px', borderRadius: '8px' }}
+          />
           <h1>ATEMPORAL</h1>
-          <p>Descubre tu estilo con nuestra nueva colección.</p>
+          <p>Moda que trasciende épocas.</p>
         </div>
       </div>
       <div className="login-right">
         <div className="login-box">
-          <h2>Bienvenido de nuevo</h2>
-          <p className="subtitle">Ingresa tus credenciales para continuar</p>
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+
+            <h2 style={{ marginTop: '10px' }}>Bienvenido de nuevo</h2>
+            <p className="subtitle">Ingresa tus credenciales para continuar</p>
+          </div>
 
           {error && (
             <div style={{ color: '#991b1b', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>

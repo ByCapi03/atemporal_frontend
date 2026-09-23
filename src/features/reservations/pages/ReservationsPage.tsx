@@ -11,7 +11,7 @@ export const ReservationsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await api.get('/reservations');
+      const { data } = await api.get('/reservations/my');
       setReservations(data);
     } catch (err: any) {
       setError('Error al cargar tus reservas');
@@ -25,7 +25,7 @@ export const ReservationsPage = () => {
   }, []);
 
   const handleCancel = async (id: number) => {
-    if (!window.confirm('Ests seguro que deseas cancelar esta reserva?')) return;
+    if (!window.confirm('¿Estás seguro que deseas cancelar esta reserva?')) return;
     try {
       await api.patch(`/reservations/${id}`, { status: 'CANCELADA' });
       fetchReservations();
@@ -79,7 +79,7 @@ export const ReservationsPage = () => {
               </div>
 
               <div>
-                <h4 style={{ margin: '0 0 10px 0', color: '#555' }}>Artculos:</h4>
+                <h4 style={{ margin: '0 0 10px 0', color: '#555' }}>Artículos:</h4>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                   {res.items.map((item: any) => (
                     <li key={item.id} style={{ padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '4px', marginBottom: '5px', display: 'flex', justifyContent: 'space-between' }}>
