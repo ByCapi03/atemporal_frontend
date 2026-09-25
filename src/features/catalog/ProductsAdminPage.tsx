@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ProductsSection } from '../components/ProductsSection';
-import { VariantsSection } from '../components/VariantsSection';
-import { AttributesSection } from '../components/AttributesSection';
+import { ProductsSection } from './components/ProductsSection';
+import { VariantsSection } from './components/VariantsSection';
+import { AttributesSection } from './components/AttributesSection';
 
 export const ProductsAdminPage = () => {
   const [activeTab, setActiveTab] = useState<'products' | 'variants' | 'attributes'>('products');

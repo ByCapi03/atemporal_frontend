@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { initDetector, getPose, clearSmoothing } from '../utils/poseDetection';
-import { api } from '../../../api/axios';
+import { initDetector, getPose, clearSmoothing } from './utils/poseDetection';
+import { api } from '../../api/axios';
 
 interface ProductDetail {
   id: number;

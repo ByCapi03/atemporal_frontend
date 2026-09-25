@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { api } from '../../../api/axios';
-import '../../../styles/store.css';
+import { api } from '../../api/axios';
+import '../../styles/store.css';
 
 export const CreateReservationPage = () => {
   const location = useLocation();

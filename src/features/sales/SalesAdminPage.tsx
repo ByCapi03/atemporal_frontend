@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../../api/axios';
-import { useAuth } from '../../auth/AuthContext';
-import '../../../styles/store.css';
+import { api } from '../../api/axios';
+import { useAuth } from '../auth/AuthContext';
+import '../../styles/store.css';
 
 interface SaleSummary {
   id: number;

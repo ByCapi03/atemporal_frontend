@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../../api/axios';
-import '../../../styles/store.css';
+import { api } from '../../api/axios';
+import '../../styles/store.css';
 
 export const ReservationsPage = () => {
   const [reservations, setReservations] = useState<any[]>([]);
@@ -31,6 +31,16 @@ export const ReservationsPage = () => {
       fetchReservations();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Error al cancelar');
+    }
+  };
+
+  const handlePay = async (id: number) => {
+    try {
+      await api.post(`/reservations/${id}/pay`);
+      alert('Pago procesado correctamente');
+      fetchReservations();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Error al procesar el pago');
     }
   };
 
@@ -93,7 +103,16 @@ export const ReservationsPage = () => {
               </div>
 
               {res.status !== 'CANCELADA' && res.status !== 'ATENDIDA' && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px', gap: '10px' }}>
+                  {res.status === 'PENDIENTE' && (
+                    <button 
+                      className="btn"
+                      style={{ backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
+                      onClick={() => handlePay(res.id)}
+                    >
+                      Pagar Reserva
+                    </button>
+                  )}
                   <button 
                     className="btn-outline"
                     style={{ borderColor: '#dc3545', color: '#dc3545' }}

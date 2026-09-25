@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/axios';
-import '../../styles/login.css';
 
 export const ActivateAccountPage = () => {
   const navigate = useNavigate();

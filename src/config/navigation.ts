@@ -10,14 +10,14 @@ export interface NavItem {
 
 export const DASHBOARD_NAVIGATION: NavItem[] = [
   {
-    name: 'Dashboard',
+    name: 'Inicio',
     path: '/dashboard',
     allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
   },
   {
     name: 'Productos',
     path: '/dashboard/products',
-    allowedRoles: [ROL.ADMIN],
+    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
   },
 
   {
@@ -46,8 +46,13 @@ export const DASHBOARD_NAVIGATION: NavItem[] = [
     allowedRoles: [ROL.ADMIN],
   },
   {
-    name: 'Usuarios',
+    name: 'Usuarios / Cajeros',
     path: '/dashboard/users',
+    allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
+  },
+  {
+    name: 'Sesiones de Caja',
+    path: '/dashboard/cash-sessions',
     allowedRoles: [ROL.ADMIN, ROL.ENCARGADO],
   },
   {

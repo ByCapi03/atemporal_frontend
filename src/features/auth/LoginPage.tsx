@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/axios';
 import { useAuth } from './AuthContext';
 import atemporalLogo from '../../assets/ATEMPORAL.png';
-import '../../styles/login.css';
 
 export const LoginPage = () => {
   const navigate = useNavigate();

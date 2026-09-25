@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../../api/axios';
-import { useAuth } from '../../auth/AuthContext';
-import '../../../styles/store.css';
+import { api } from '../../api/axios';
+import { useAuth } from '../auth/AuthContext';
+import '../../styles/store.css';
 
 interface DashboardMetrics {
   salesTodayAmount: number;
   salesTodayCount: number;
   activeReservations: number;
+  resPendientes: number;
+  resConfirmadasPreparando: number;
+  resListas: number;
+  activeCashiers: number;
   lowStockCount: number;
   salesLast7Days: { date: string; amount: number; count: number }[];
   salesByChannel: { POS: number; WEB: number; MOVIL: number };
@@ -86,6 +90,30 @@ export const DashboardPage = () => {
           <h2 style={{ fontSize: '1.8rem', color: '#dc3545', margin: '8px 0 0 0' }}>{metrics.lowStockCount}</h2>
         </div>
       </div>
+
+      {!isAdmin && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+            <span style={{ fontSize: '0.85rem', color: '#6c757d', fontWeight: '600', textTransform: 'uppercase' }}>Res. Pendientes</span>
+            <h2 style={{ fontSize: '1.5rem', color: '#fd7e14', margin: '8px 0 0 0' }}>{metrics.resPendientes}</h2>
+          </div>
+          
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+            <span style={{ fontSize: '0.85rem', color: '#6c757d', fontWeight: '600', textTransform: 'uppercase' }}>Res. Confirm/Prep</span>
+            <h2 style={{ fontSize: '1.5rem', color: '#0d6efd', margin: '8px 0 0 0' }}>{metrics.resConfirmadasPreparando}</h2>
+          </div>
+          
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+            <span style={{ fontSize: '0.85rem', color: '#6c757d', fontWeight: '600', textTransform: 'uppercase' }}>Res. Listas</span>
+            <h2 style={{ fontSize: '1.5rem', color: '#20c997', margin: '8px 0 0 0' }}>{metrics.resListas}</h2>
+          </div>
+
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+            <span style={{ fontSize: '0.85rem', color: '#6c757d', fontWeight: '600', textTransform: 'uppercase' }}>Cajeros Activos</span>
+            <h2 style={{ fontSize: '1.5rem', color: '#6f42c1', margin: '8px 0 0 0' }}>{metrics.activeCashiers}</h2>
+          </div>
+        </div>
+      )}
 
       {/* Visualizations Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px', marginBottom: '30px' }}>

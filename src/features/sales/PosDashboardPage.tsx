@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../../api/axios';
-import { useAuth } from '../../auth/AuthContext';
+import { api } from '../../api/axios';
+import { useAuth } from '../auth/AuthContext';
 
 interface CashSessionData {
   status: 'OPEN' | 'CLOSED';

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { api } from '../../api/axios';
 import atemporalLogo from '../../assets/ATEMPORAL.png';
-import '../../styles/login.css';
 
 export const RegisterPage = () => {
   const [email, setEmail] = useState('');

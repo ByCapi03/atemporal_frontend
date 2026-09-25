@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../../api/axios';
-import { useAuth } from '../../auth/AuthContext';
+import { api } from '../../api/axios';
+import { useAuth } from '../auth/AuthContext';
 
 interface Inventory {
   id: number;

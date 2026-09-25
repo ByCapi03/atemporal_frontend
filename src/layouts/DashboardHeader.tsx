@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Bell } from 'lucide-react';
 import { api } from '../api/axios';
-import { messaging, getToken, onMessage, firebaseConfig } from '../config/firebase';
-
+import { messaging, onMessage } from '../config/firebase';
+import { useFirebaseNotifications } from '../hooks/useFirebaseNotifications';
 interface Notification {
   id: number;
   type: string;
@@ -15,12 +16,12 @@ interface Notification {
 }
 
 export const DashboardHeader = () => {
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [permission, setPermission] = useState(Notification.permission);
+  const { permission, requestPermissionAndRegister, isSupported } = useFirebaseNotifications();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const fetchNotifications = async () => {
@@ -47,6 +48,10 @@ export const DashboardHeader = () => {
         console.log('[DashboardHeader] onMessage received: ', payload);
         fetchNotifications();
         
+        if (payload.data?.type === 'RESERVATION_CREATED') {
+          window.dispatchEvent(new CustomEvent('RESERVATION_CREATED'));
+        }
+
         // Show small toast
         setToastMessage(payload.notification?.title || 'Nueva notificación');
         setTimeout(() => setToastMessage(null), 4000);
@@ -65,9 +70,12 @@ export const DashboardHeader = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const getDisplayRole = () => {
+    if (!user) return 'PERSONAL';
+    if (user.roles?.includes('ADMIN')) return 'ADMINISTRADOR';
+    if (user.roles?.includes('ENCARGADO')) return `ENCARGADO - SUCURSAL ${user.branchId || ''}`;
+    if (user.roles?.includes('CAJERO')) return `CAJERO - SUCURSAL ${user.branchId || ''}`;
+    return 'PERSONAL';
   };
 
   const handleMarkAsRead = async (id: number) => {
@@ -88,34 +96,6 @@ export const DashboardHeader = () => {
     }
   };
 
-  const handleEnableNotifications = async () => {
-    try {
-      const perm = await Notification.requestPermission();
-      setPermission(perm);
-      
-      if (perm === 'granted') {
-        // Register SW with query params to pass config safely without placeholders
-        const queryParams = new URLSearchParams(firebaseConfig as any).toString();
-        const registration = await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${queryParams}`);
-        
-        const token = await getToken(messaging, { 
-          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-          serviceWorkerRegistration: registration
-        });
-        
-        if (token) {
-          await api.post('/notifications/devices', {
-            token,
-            platform: 'WEB'
-          });
-          console.log('Firebase token registered successfully');
-        }
-      }
-    } catch (error) {
-      console.error('Error enabling notifications:', error);
-    }
-  };
-
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -131,7 +111,7 @@ export const DashboardHeader = () => {
         </div>
       )}
 
-      <h2>Sistema Interno</h2>
+      <h2> </h2>
       <div className="header-actions">
         
         {/* Notification Bell */}
@@ -140,7 +120,7 @@ export const DashboardHeader = () => {
             className="notification-btn"
             onClick={() => setShowDropdown(!showDropdown)}
           >
-            🔔
+            <Bell size={22} color="var(--atemporal-green)" />
             {unreadCount > 0 && (
               <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
             )}
@@ -155,11 +135,11 @@ export const DashboardHeader = () => {
                 )}
               </div>
               
-              {permission === 'default' && (
+              {isSupported && permission === 'default' && (
                 <div style={{ padding: '10px 15px', backgroundColor: '#f0f8ff', borderBottom: '1px solid #eee', textAlign: 'center' }}>
                   <p style={{ fontSize: '0.85rem', color: '#555', margin: '0 0 8px 0' }}>Activa las notificaciones de escritorio para no perder ninguna reserva.</p>
                   <button 
-                    onClick={handleEnableNotifications}
+                    onClick={requestPermissionAndRegister}
                     style={{ backgroundColor: '#1c2a28', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
                   >
                     Habilitar notificaciones
@@ -191,8 +171,12 @@ export const DashboardHeader = () => {
           )}
         </div>
 
-        <span>Bienvenido, {user?.name || 'Personal'}</span>
-        <button className="btn-secondary" onClick={handleLogout}>Salir</button>
+        <div className="user-profile">
+          <div className="user-info">
+            <span className="user-name">{user?.name || 'Usuario'}</span>
+            <span className="user-role-badge">{getDisplayRole()}</span>
+          </div>
+        </div>
       </div>
     </header>
   );

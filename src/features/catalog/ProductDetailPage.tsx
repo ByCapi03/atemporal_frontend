@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../../../api/axios';
-import { useCart } from '../../cart/CartContext';
-import { useAuth } from '../../auth/AuthContext';
-import '../../../styles/store.css';
+import { api } from '../../api/axios';
+import { useCart } from '../cart/CartContext';
+import { useAuth } from '../auth/AuthContext';
+import '../../styles/store.css';
 
 interface VariantInfo {
   id: number;

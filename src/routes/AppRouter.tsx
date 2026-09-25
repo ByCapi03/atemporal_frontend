@@ -15,31 +15,30 @@ import { RegisterPage } from '../features/auth/RegisterPage';
 import { ActivateAccountPage } from '../features/auth/ActivateAccountPage';
 import { ChangePasswordPage } from '../features/auth/ChangePasswordPage';
 // Store Pages
-import { HomePage } from '../features/home/pages/HomePage';
-import { CatalogPage } from '../features/catalog/pages/CatalogPage';
-import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage';
+import { HomePage } from '../features/home/HomePage';
+import { CatalogPage } from '../features/catalog/CatalogPage';
+import { ProductDetailPage } from '../features/catalog/ProductDetailPage';
 import { BranchesPage } from '../features/branches/BranchesPage';
-import { CreateReservationPage } from '../features/reservations/pages/CreateReservationPage';
+import { CreateReservationPage } from '../features/reservations/CreateReservationPage';
 import { CartPage } from '../features/cart/CartPage';
-import { CheckoutPage } from '../features/checkout/pages/CheckoutPage';
-import { TryOnPage } from '../features/try-on/pages/TryOnPage';
+import { TryOnPage } from '../features/try-on/TryOnPage';
+import { ComingSoon } from '../components/ComingSoon';
 
 // Account Pages
 import { AccountProfile } from '../features/account/AccountProfile';
-import { ReservationsPage } from '../features/reservations/pages/ReservationsPage';
-import { OrdersPage } from '../features/orders/pages/OrdersPage';
-import { OrderDetailPage } from '../features/orders/pages/OrderDetailPage';
+import { ReservationsPage } from '../features/reservations/ReservationsPage';
 
 // Backoffice Pages
-import { DashboardPage } from '../features/home/pages/DashboardPage';
-import { ProductsAdminPage } from '../features/catalog/pages/ProductsAdminPage';
-import { InventoryAdminPage } from '../features/inventory/pages/InventoryAdminPage';
-import { ReservationsAdminPage } from '../features/reservations/pages/ReservationsAdminPage';
-import { SalesAdminPage } from '../features/sales/pages/SalesAdminPage';
-import { PosDashboardPage } from '../features/sales/pages/PosDashboardPage';
-import { PosTerminalPage } from '../features/sales/pages/PosTerminalPage';
-import { UsersPage } from '../features/dashboard/pages/UsersPage';
-import { ReportsPage } from '../features/reports/pages/ReportsPage';
+import { DashboardPage } from '../features/home/DashboardPage';
+import { ProductsAdminPage } from '../features/catalog/ProductsAdminPage';
+import { InventoryAdminPage } from '../features/inventory/InventoryAdminPage';
+import { ReservationsAdminPage } from '../features/reservations/ReservationsAdminPage';
+import { SalesAdminPage } from '../features/sales/SalesAdminPage';
+import { PosDashboardPage } from '../features/sales/PosDashboardPage';
+import { PosTerminalPage } from '../features/sales/PosTerminalPage';
+import { CashSessionsAdminPage } from '../features/sales/CashSessionsAdminPage';
+import { UsersPage } from '../features/dashboard/UsersPage';
+import { ReportsPage } from '../features/reports/ReportsPage';
 import { SuppliersPage } from '../features/suppliers/SuppliersPage';
 
 export const AppRouter = () => {
@@ -62,7 +61,7 @@ export const AppRouter = () => {
           <Route path="try-on/:variantId" element={<TryOnPage />} />
           <Route path="reservations/new" element={<CreateReservationPage />} />
           <Route path="cart" element={<CartPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="checkout" element={<ComingSoon />} />
         </Route>
 
         {/* Client Account Routes */}
@@ -75,8 +74,8 @@ export const AppRouter = () => {
           <Route element={<ClientAccountLayout />}>
             <Route index element={<AccountProfile />} />
             <Route path="reservations" element={<ReservationsPage />} />
-            <Route path="purchases" element={<OrdersPage />} />
-            <Route path="purchases/:id" element={<OrderDetailPage />} />
+            <Route path="purchases" element={<ComingSoon />} />
+            <Route path="purchases/:id" element={<ComingSoon />} />
           </Route>
         </Route>
 
@@ -103,6 +102,7 @@ export const AppRouter = () => {
             <Route path="pos" element={<PosDashboardPage />} />
             <Route path="pos/terminal" element={<PosTerminalPage />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="cash-sessions" element={<CashSessionsAdminPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="suppliers" element={<SuppliersPage />} />
           </Route>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../../api/axios';
-import { useAuth } from '../../auth/AuthContext';
-import { ROL } from '../../../types/roles';
-import type { City } from '../../branches/CitiesSection'; // For type or just any
+import { api } from '../../api/axios';
+import { useAuth } from '../auth/AuthContext';
+import { ROL } from '../../types/roles';
+import type { City } from '../branches/CitiesSection'; // For type or just any
 
 interface Branch {
   id: number;
