@@ -25,6 +25,18 @@ export const RegisterPage = () => {
     try {
       const res = await api.post('/auth/register', { name, lastName, email, password, phone });
       login(res.data.accessToken, res.data.user);
+      
+      const pendingReservationStr = sessionStorage.getItem('pendingReservation');
+      if (pendingReservationStr) {
+        try {
+          const pendingReservation = JSON.parse(pendingReservationStr);
+          navigate('/reservations/new', { state: pendingReservation, replace: true });
+          return;
+        } catch (e) {
+          console.error('Error parsing pendingReservation', e);
+        }
+      }
+      
       navigate('/');
     } catch (err: any) {
       console.error(err);

@@ -156,13 +156,17 @@ export const ReservationsAdminPage = () => {
                   </td>
                   {isCajero && (
                     <td style={{ padding: '12px 8px' }}>
-                      {res.sale?.payments?.map((p: any) => p.status).join(', ') || 'PENDIENTE'}
+                      <span style={{ fontWeight: 'bold', color: res.paymentSummary?.paymentState === 'PAGADO' ? '#28a745' : res.paymentSummary?.paymentState === 'PARCIAL' ? '#fd7e14' : '#dc3545' }}>
+                        {res.paymentSummary?.paymentState || 'PENDIENTE'}
+                      </span>
+                      <br/>
+                      <small style={{ color: '#666' }}>Saldo: Bs. {res.paymentSummary?.remainingAmount || 0}</small>
                     </td>
                   )}
                   <td style={{ padding: '12px 8px' }}>
                     {isCajero ? (
                       res.status === 'LISTA' ? (
-                        res.sale?.payments?.some((p: any) => p.status === 'APROBADO') ? (
+                        res.paymentSummary?.paymentState === 'PAGADO' ? (
                           <button 
                             onClick={() => handleDeliver(res.id)}
                             style={{ padding: '6px 12px', backgroundColor: '#28a745', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
@@ -183,9 +187,9 @@ export const ReservationsAdminPage = () => {
                             </select>
                             <button 
                               onClick={() => handlePayAndDeliver(res.id)}
-                              style={{ padding: '6px 12px', backgroundColor: '#007bff', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                              style={{ padding: '6px 12px', backgroundColor: '#007bff', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center' }}
                             >
-                              COBRAR Y ENTREGAR
+                              COBRAR SALDO Y ENTREGAR <br/> (Bs. {res.paymentSummary?.remainingAmount})
                             </button>
                           </div>
                         )

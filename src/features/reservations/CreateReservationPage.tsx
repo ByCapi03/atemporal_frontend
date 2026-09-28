@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { api } from '../../api/axios';
+import { useAuth } from '../auth/AuthContext';
 import '../../styles/store.css';
 
 export const CreateReservationPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
   let state = location.state as any;
 
@@ -21,10 +23,8 @@ export const CreateReservationPage = () => {
   }
 
   useEffect(() => {
-    if (state) {
-      // Solo limpiamos cuando la página cargó exitosamente
-      sessionStorage.removeItem('pendingReservation');
-    }
+    // Ya no limpiamos el sessionStorage automáticamente al cargar.
+    // Solo se limpiará después de crear la reserva exitosamente.
   }, [state]);
 
   if (!state) {
@@ -34,31 +34,62 @@ export const CreateReservationPage = () => {
 
   const { productName, price, variantId, sizeName, colorName, branchId, branchName } = state;
 
-  const [date, setDate] = useState('');
-  const [approximateTime, setApproximateTime] = useState('');
+  const [date, setDate] = useState(state.date || '');
+  const [approximateTime, setApproximateTime] = useState(state.approximateTime || '');
   const [quantity, setQuantity] = useState(state.quantity || 1);
+  const [paymentOption, setPaymentOption] = useState<'DEPOSIT_30' | 'FULL' | null>(state.paymentOption || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!date) {
       setError('Por favor, selecciona una fecha');
+      return;
+    }
+    if (!paymentOption) {
+      setError('Por favor, selecciona una opción de pago');
+      return;
+    }
+
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pendingReservation', JSON.stringify({
+        ...state,
+        date,
+        approximateTime,
+        quantity,
+        paymentOption
+      }));
+      setShowAuthModal(true);
       return;
     }
     try {
       setLoading(true);
       setError(null);
-      await api.post('/reservations', {
+      const res = await api.post('/reservations/intent', {
         branchId,
         date,
         approximateTime,
         items: [
           { variantId, quantity }
-        ]
+        ],
+        paymentOption
       });
-      alert('¡Reserva creada con éxito!');
-      navigate('/account/reservations');
+
+      const { paymentIntentId, amountToPay } = res.data;
+
+      // Simular Pasarela MOCK
+      const simulateSuccess = window.confirm(`PASARELA MOCK (Stripe):\n\n¿Simular pago EXITOSO para el intento ${paymentIntentId} por Bs. ${amountToPay}?`);
+
+      if (simulateSuccess) {
+        await api.post(`/payments/mock/${paymentIntentId}/succeed`, { amount: amountToPay });
+        alert('¡Reserva confirmada y pagada con éxito!');
+        sessionStorage.removeItem('pendingReservation');
+        navigate('/account/reservations');
+      } else {
+        await api.post(`/payments/mock/${paymentIntentId}/fail`, { amount: amountToPay });
+        alert('El pago fue rechazado o cancelado. La reserva no se completó.');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear la reserva');
     } finally {
@@ -80,7 +111,7 @@ export const CreateReservationPage = () => {
 
         {error && <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', borderRadius: '4px', marginBottom: '20px' }}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={e => e.preventDefault()}>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#555' }}>Fecha de recojo *</label>
             <input 
@@ -114,16 +145,80 @@ export const CreateReservationPage = () => {
             />
           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="btn-primary"
-            style={{ width: '100%', opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? 'Procesando...' : 'Confirmar Reserva'}
-          </button>
+          <div style={{ marginBottom: '25px' }}>
+            <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', color: '#555' }}>Opción de Pago *</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div 
+                onClick={() => setPaymentOption('DEPOSIT_30')}
+                style={{ 
+                  padding: '15px', borderRadius: '8px', border: `2px solid ${paymentOption === 'DEPOSIT_30' ? '#17a2b8' : '#ccc'}`,
+                  backgroundColor: paymentOption === 'DEPOSIT_30' ? '#e0f7fa' : '#fff', cursor: 'pointer',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                <span style={{ fontWeight: 'bold', color: paymentOption === 'DEPOSIT_30' ? '#0056b3' : '#333' }}>PAGAR 30% (Anticipo)</span>
+                <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: paymentOption === 'DEPOSIT_30' ? '#0056b3' : '#333' }}>Bs. {(Number(price) * quantity * 0.3).toFixed(2)}</span>
+              </div>
+              <div 
+                onClick={() => setPaymentOption('FULL')}
+                style={{ 
+                  padding: '15px', borderRadius: '8px', border: `2px solid ${paymentOption === 'FULL' ? '#28a745' : '#ccc'}`,
+                  backgroundColor: paymentOption === 'FULL' ? '#e8f5e9' : '#fff', cursor: 'pointer',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                <span style={{ fontWeight: 'bold', color: paymentOption === 'FULL' ? '#155724' : '#333' }}>PAGAR COMPLETO</span>
+                <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: paymentOption === 'FULL' ? '#155724' : '#333' }}>Bs. {(Number(price) * quantity).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '20px' }}>
+            <button 
+              type="button" 
+              onClick={() => handleSubmit()}
+              disabled={loading || !paymentOption}
+              className="btn-primary"
+              style={{ padding: '15px', borderRadius: '8px', cursor: (loading || !paymentOption) ? 'not-allowed' : 'pointer', fontSize: '1.1rem', fontWeight: 'bold', width: '100%', opacity: (loading || !paymentOption) ? 0.6 : 1 }}
+            >
+              {loading ? 'Procesando...' : 'Confirmar Reserva y Pagar'}
+            </button>
+          </div>
         </form>
       </div>
+
+      {showAuthModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '8px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+            <h3 style={{ marginTop: 0, color: '#333' }}>Inicia sesión para continuar</h3>
+            <p style={{ color: '#666', marginBottom: '25px' }}>Para completar tu reserva necesitas una cuenta.</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button 
+                onClick={() => navigate('/register')}
+                className="btn-primary"
+                style={{ width: '100%' }}
+              >
+                CREAR CUENTA
+              </button>
+              <button 
+                onClick={() => navigate('/login')}
+                className="btn-outline"
+                style={{ width: '100%', padding: '10px', borderRadius: '4px', cursor: 'pointer', border: '1px solid #0056b3', color: '#0056b3', backgroundColor: 'transparent' }}
+              >
+                YA TENGO CUENTA
+              </button>
+              <button 
+                onClick={() => setShowAuthModal(false)}
+                style={{ marginTop: '10px', padding: '10px', background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

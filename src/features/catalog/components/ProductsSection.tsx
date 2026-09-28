@@ -7,19 +7,26 @@ interface Product {
   price: number;
   active: boolean;
   categoryId: number;
+  collectionId?: number;
   imageUrl?: string;
   arEnabled?: boolean;
   arImageUrl?: string;
   arType?: 'TOP' | 'BOTTOM' | 'DRESS' | null;
   category?: { name: string };
+  collection?: { name: string, season?: { name: string } };
+  basePrice?: number;
+  finalPrice?: number;
+  discount?: { type: string, value: number, amount: number } | null;
+  winningPromotion?: { name: string } | null;
 }
 
 export const ProductsSection = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
+  const [collections, setCollections] = useState<{id: number, name: string}[]>([]);
   
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ id: 0, name: '', price: '', categoryId: 0, active: true, arEnabled: false, arType: '' });
+  const [form, setForm] = useState({ id: 0, name: '', price: '', categoryId: 0, collectionId: '', active: true, arEnabled: false, arType: '' });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedArFile, setSelectedArFile] = useState<File | null>(null);
@@ -29,12 +36,14 @@ export const ProductsSection = () => {
 
   const fetchData = async () => {
     try {
-      const [prodRes, catRes] = await Promise.all([
+      const [prodRes, catRes, colRes] = await Promise.all([
         api.get('/products'),
-        api.get('/categories')
+        api.get('/categories'),
+        api.get('/collections').catch(() => ({ data: [] }))
       ]);
       setProducts(prodRes.data);
       setCategories(catRes.data);
+      setCollections(colRes.data);
       setError(null);
     } catch (err) {
       console.error('Error fetching data', err);
@@ -94,6 +103,7 @@ export const ProductsSection = () => {
         name: form.name,
         price: parseFloat(form.price),
         categoryId: Number(form.categoryId),
+        collectionId: form.collectionId ? Number(form.collectionId) : null,
         active: form.active,
         arEnabled: form.arEnabled,
         arType: form.arEnabled ? (form.arType || null) : null
@@ -133,7 +143,7 @@ export const ProductsSection = () => {
   };
 
   const resetForm = () => {
-    setForm({ id: 0, name: '', price: '', categoryId: 0, active: true, arEnabled: false, arType: '' });
+    setForm({ id: 0, name: '', price: '', categoryId: 0, collectionId: '', active: true, arEnabled: false, arType: '' });
     setSelectedFile(null);
     setPreviewUrl(null);
     setSelectedArFile(null);
@@ -147,6 +157,7 @@ export const ProductsSection = () => {
       name: p.name, 
       price: String(p.price), 
       categoryId: p.categoryId, 
+      collectionId: p.collectionId ? String(p.collectionId) : '',
       active: p.active,
       arEnabled: p.arEnabled || false,
       arType: p.arType || ''
@@ -193,6 +204,13 @@ export const ProductsSection = () => {
               <select required value={form.categoryId} onChange={e => setForm({...form, categoryId: Number(e.target.value)})}>
                 <option value="">Seleccione...</option>
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Colección (Opcional)</label>
+              <select value={form.collectionId} onChange={e => setForm({...form, collectionId: e.target.value})}>
+                <option value="">Ninguna</option>
+                {collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div className="form-group">
@@ -259,7 +277,8 @@ export const ProductsSection = () => {
             <th>Imagen</th>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Precio</th>
+            <th>Precio Final</th>
+            <th>Campaña / Promo</th>
             <th>Categoría</th>
             <th>AR</th>
             <th>Estado</th>
@@ -278,7 +297,25 @@ export const ProductsSection = () => {
               </td>
               <td>{p.id}</td>
               <td>{p.name}</td>
-              <td>Bs. {p.price}</td>
+              <td>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {p.discount ? (
+                    <>
+                      <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '0.8rem' }}>Bs. {p.basePrice?.toFixed(2)}</span>
+                      <span style={{ fontWeight: 'bold', color: '#28a745' }}>Bs. {p.finalPrice?.toFixed(2)}</span>
+                    </>
+                  ) : (
+                    <span style={{ fontWeight: 'bold' }}>Bs. {Number(p.price).toFixed(2)}</span>
+                  )}
+                </div>
+              </td>
+              <td>
+                <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.8rem' }}>
+                  {p.collection?.season && <span>{p.collection.season.name}</span>}
+                  {p.collection && <span style={{ color: '#0056b3' }}>{p.collection.name}</span>}
+                  {p.discount && <span style={{ color: '#e53e3e', fontWeight: 'bold' }}>{p.winningPromotion?.name} (-{p.discount.type === 'PERCENTAGE' ? `${p.discount.value}%` : `Bs.${p.discount.value}`})</span>}
+                </div>
+              </td>
               <td>{p.category?.name}</td>
               <td>
                 {p.arEnabled && p.arType ? (

@@ -9,6 +9,8 @@ interface Product {
   categoryId: number;
   categoryName: string;
   imageUrl: string | null;
+  finalPrice?: number;
+  discount?: { type: string; value: number; amount: number } | null;
 }
 
 export const CatalogPage = () => {
@@ -85,7 +87,12 @@ export const CatalogPage = () => {
               onClick={() => navigate(`/products/${p.id}`)}
               style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
             >
-              <div className="product-image-placeholder">
+              <div className="product-image-placeholder" style={{ position: 'relative' }}>
+                {p.discount && (
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: '#e53e3e', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    {p.discount.type === 'PERCENTAGE' ? `-${p.discount.value}%` : `-Bs.${p.discount.value}`}
+                  </div>
+                )}
                 {p.imageUrl ? (
                   <img src={p.imageUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
                 ) : (
@@ -95,7 +102,14 @@ export const CatalogPage = () => {
               <div>
                 <span style={{ fontSize: '0.85rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{p.categoryName}</span>
                 <h3 className="product-name">{p.name}</h3>
-                <p className="product-price">Bs. {Number(p.price).toFixed(2)}</p>
+                {p.discount ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <p style={{ margin: 0, textDecoration: 'line-through', color: '#999', fontSize: '0.9rem' }}>Bs. {Number(p.price).toFixed(2)}</p>
+                    <p className="product-price" style={{ margin: 0, color: '#e53e3e' }}>Bs. {Number((p as any).finalPrice).toFixed(2)}</p>
+                  </div>
+                ) : (
+                  <p className="product-price">Bs. {Number(p.price).toFixed(2)}</p>
+                )}
               </div>
             </div>
           ))}

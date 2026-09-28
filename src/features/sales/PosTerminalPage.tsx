@@ -114,7 +114,10 @@ export const PosTerminalPage = () => {
   }, [products, searchQuery]);
 
   const total = useMemo(() => {
-    return cart.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0);
+    return cart.reduce((acc, item) => {
+      const priceToUse = (item.product as any).finalPrice !== undefined ? (item.product as any).finalPrice : item.product.price;
+      return acc + Number(priceToUse) * item.quantity;
+    }, 0);
   }, [cart]);
 
   const addToCart = (product: PosProduct) => {
@@ -229,7 +232,18 @@ export const PosTerminalPage = () => {
                 <h5 style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>{p.productName}</h5>
                 <p style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: '#666' }}>SKU: {p.sku}</p>
                 <p style={{ margin: '0 0 5px 0', fontSize: '0.8rem' }}>{p.size} | {p.color}</p>
-                <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>Bs. {Number(p.price).toFixed(2)}</p>
+                
+                {(p as any).discount ? (
+                  <>
+                    <p style={{ margin: '0 0 2px 0', textDecoration: 'line-through', color: '#999', fontSize: '0.85rem' }}>Bs. {Number(p.price).toFixed(2)}</p>
+                    <p style={{ margin: '0 0 2px 0', color: '#dc3545', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                      {(p as any).discount.type === 'PERCENTAGE' ? `-${(p as any).discount.value}%` : `-Bs.${(p as any).discount.value}`} OFF
+                    </p>
+                    <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', fontSize: '1.1rem', color: '#28a745' }}>Bs. {Number((p as any).finalPrice).toFixed(2)}</p>
+                  </>
+                ) : (
+                  <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', fontSize: '1.1rem' }}>Bs. {Number(p.price).toFixed(2)}</p>
+                )}
                 
                 <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.8rem', color: 'green', fontWeight: 'bold' }}>Stock: {p.available}</span>
@@ -353,7 +367,7 @@ export const PosTerminalPage = () => {
                     <button onClick={() => removeFromCart(item.product.variantId)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontSize: '0.8rem' }}>✖</button>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.9rem', color: '#666' }}>Bs. {Number(item.product.price).toFixed(2)}</span>
+                    <span style={{ fontSize: '0.9rem', color: '#666' }}>Bs. {Number((item.product as any).finalPrice !== undefined ? (item.product as any).finalPrice : item.product.price).toFixed(2)}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <button 
                         onClick={() => updateQuantity(item.product.variantId, -1)}
@@ -369,7 +383,7 @@ export const PosTerminalPage = () => {
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', marginTop: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    Bs. {(Number(item.product.price) * item.quantity).toFixed(2)}
+                    Bs. {(Number((item.product as any).finalPrice !== undefined ? (item.product as any).finalPrice : item.product.price) * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}

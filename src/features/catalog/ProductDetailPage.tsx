@@ -18,6 +18,8 @@ interface ProductDetail {
   id: number;
   name: string;
   price: number;
+  finalPrice?: number;
+  discount?: { type: string; value: number; amount: number } | null;
   categoryName: string;
   imageUrl: string | null;
   arEnabled?: boolean;
@@ -226,7 +228,17 @@ export const ProductDetailPage = () => {
         <button onClick={() => navigate('/catalog')} style={{ background: 'none', border: 'none', color: 'var(--atemporal-gold)', cursor: 'pointer', padding: 0, marginBottom: '20px', fontWeight: 'bold' }}>&larr; Volver al catálogo</button>
         <span style={{ display: 'block', fontSize: '0.9rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.categoryName}</span>
         <h1 style={{ fontSize: '2.5rem', margin: '10px 0', color: 'var(--atemporal-green)' }}>{product.name}</h1>
-        <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--atemporal-gold)', marginBottom: '30px' }}>Bs. {Number(product.price).toFixed(2)}</p>
+        {product.discount ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
+            <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#999', margin: 0 }}>Bs. {Number(product.price).toFixed(2)}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#e53e3e', margin: 0 }}>Bs. {Number(product.finalPrice).toFixed(2)}</p>
+            <span style={{ backgroundColor: '#e53e3e', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.9rem', fontWeight: 'bold' }}>
+              {product.discount.type === 'PERCENTAGE' ? `-${product.discount.value}%` : `-Bs.${product.discount.value}`} OFF
+            </span>
+          </div>
+        ) : (
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--atemporal-gold)', marginBottom: '30px' }}>Bs. {Number(product.price).toFixed(2)}</p>
+        )}
 
         {/* Color Selection */}
         <div style={{ marginBottom: '20px' }}>

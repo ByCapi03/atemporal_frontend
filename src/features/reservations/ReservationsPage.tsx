@@ -34,15 +34,7 @@ export const ReservationsPage = () => {
     }
   };
 
-  const handlePay = async (id: number) => {
-    try {
-      await api.post(`/reservations/${id}/pay`);
-      alert('Pago procesado correctamente');
-      fetchReservations();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al procesar el pago');
-    }
-  };
+
 
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -102,17 +94,17 @@ export const ReservationsPage = () => {
                 </ul>
               </div>
 
+              {res.paymentSummary && (
+                <div style={{ backgroundColor: '#f4f6f8', padding: '15px', borderRadius: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', fontSize: '0.9rem' }}>
+                  <div><strong>Total:</strong> <br/> Bs. {res.paymentSummary.total}</div>
+                  <div><strong>Pagado:</strong> <br/> Bs. {res.paymentSummary.paidAmount}</div>
+                  <div><strong>Saldo:</strong> <br/> Bs. {res.paymentSummary.remainingAmount}</div>
+                  <div><strong>Estado pago:</strong> <br/> <span style={{ fontWeight: 'bold', color: res.paymentSummary.paymentState === 'PAGADO' ? '#28a745' : res.paymentSummary.paymentState === 'PARCIAL' ? '#fd7e14' : '#dc3545' }}>{res.paymentSummary.paymentState}</span></div>
+                </div>
+              )}
+
               {res.status !== 'CANCELADA' && res.status !== 'ATENDIDA' && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px', gap: '10px' }}>
-                  {res.status === 'PENDIENTE' && (
-                    <button 
-                      className="btn"
-                      style={{ backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
-                      onClick={() => handlePay(res.id)}
-                    >
-                      Pagar Reserva
-                    </button>
-                  )}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px', gap: '10px', flexWrap: 'wrap' }}>
                   <button 
                     className="btn-outline"
                     style={{ borderColor: '#dc3545', color: '#dc3545' }}
