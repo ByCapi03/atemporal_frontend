@@ -5,6 +5,7 @@ interface Attribute {
   id: number;
   name: string;
   active: boolean;
+  hexCode?: string;
 }
 
 export const AttributesSection = () => {
@@ -12,7 +13,7 @@ export const AttributesSection = () => {
   const [sizes, setSizes] = useState<Attribute[]>([]);
   const [colors, setColors] = useState<Attribute[]>([]);
 
-  const [form, setForm] = useState({ id: 0, name: '', active: true, type: 'categories' });
+  const [form, setForm] = useState({ id: 0, name: '', active: true, type: 'categories', hexCode: '' });
 
   const fetchData = async () => {
     try {
@@ -36,13 +37,16 @@ export const AttributesSection = () => {
     if (!form.name) return;
 
     try {
-      const payload = { name: form.name, active: form.active };
+      const payload: any = { name: form.name, active: form.active };
+      if (type === 'colors' && form.hexCode) {
+        payload.hexCode = form.hexCode;
+      }
       if (form.id) {
         await api.patch(`/${type}/${form.id}`, payload);
       } else {
         await api.post(`/${type}`, payload);
       }
-      setForm({ id: 0, name: '', active: true, type });
+      setForm({ id: 0, name: '', active: true, type, hexCode: '' });
       fetchData();
     } catch (err: any) {
       alert('Error guardando: ' + (err.response?.data?.message || err.message));
@@ -50,7 +54,7 @@ export const AttributesSection = () => {
   };
 
   const handleEdit = (item: Attribute, type: string) => {
-    setForm({ id: item.id, name: item.name, active: item.active, type });
+    setForm({ id: item.id, name: item.name, active: item.active, type, hexCode: item.hexCode || '' });
   };
 
   const handleDelete = async (id: number, type: string) => {
@@ -81,9 +85,18 @@ export const AttributesSection = () => {
             onChange={e => setForm({ ...form, type, active: e.target.checked })} 
           /> Activo
         </label>
+        {type === 'colors' && (
+          <input
+            type="color"
+            value={form.type === type ? form.hexCode || '#000000' : '#000000'}
+            onChange={e => setForm({ ...form, type, hexCode: e.target.value })}
+            style={{ width: '40px', padding: 0 }}
+            title="Código de Color (Hex)"
+          />
+        )}
         <button type="submit" className="btn-primary">{form.type === type && form.id ? 'Guardar' : 'Crear'}</button>
         {form.type === type && form.id && (
-          <button type="button" className="btn-secondary" onClick={() => setForm({ id: 0, name: '', active: true, type })}>Cancelar</button>
+          <button type="button" className="btn-secondary" onClick={() => setForm({ id: 0, name: '', active: true, type, hexCode: '' })}>Cancelar</button>
         )}
       </form>
       <table className="data-table">
@@ -99,7 +112,12 @@ export const AttributesSection = () => {
           {data.map(item => (
             <tr key={item.id}>
               <td>{item.id}</td>
-              <td>{item.name}</td>
+              <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {type === 'colors' && item.hexCode && (
+                  <div style={{ width: '15px', height: '15px', backgroundColor: item.hexCode, borderRadius: '50%', border: '1px solid #ccc' }}></div>
+                )}
+                {item.name}
+              </td>
               <td>
                 <span className={item.active ? 'badge-active' : 'badge-inactive'}>
                   {item.active ? 'Activo' : 'Inactivo'}

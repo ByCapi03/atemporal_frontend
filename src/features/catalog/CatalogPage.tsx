@@ -11,6 +11,8 @@ interface Product {
   imageUrl: string | null;
   finalPrice?: number;
   discount?: { type: string; value: number; amount: number } | null;
+  seasonName?: string;
+  collectionName?: string;
 }
 
 export const CatalogPage = () => {
@@ -21,9 +23,14 @@ export const CatalogPage = () => {
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const [selectedCollection, setSelectedCollection] = useState<string>('');
+  const [onlyPromotions, setOnlyPromotions] = useState<boolean>(false);
 
-  // Extract unique categories from products
-  const categories = Array.from(new Set(products.map(p => p.categoryName))).sort();
+  // Extract unique values from products
+  const categories = Array.from(new Set(products.map(p => p.categoryName).filter(Boolean))).sort();
+  const seasons = Array.from(new Set(products.map(p => p.seasonName).filter(Boolean))).sort();
+  const collections = Array.from(new Set(products.map(p => p.collectionName).filter(Boolean))).sort();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -43,6 +50,9 @@ export const CatalogPage = () => {
 
   const filteredProducts = products.filter(p => {
     if (selectedCategory && p.categoryName !== selectedCategory) return false;
+    if (selectedSeason && p.seasonName !== selectedSeason) return false;
+    if (selectedCollection && p.collectionName !== selectedCollection) return false;
+    if (onlyPromotions && !p.discount) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -69,11 +79,37 @@ export const CatalogPage = () => {
           value={selectedCategory}
           onChange={e => setSelectedCategory(e.target.value)}
           className="form-select"
-          style={{ minWidth: '200px', width: 'auto' }}
+          style={{ minWidth: '180px', width: 'auto' }}
         >
           <option value="">Todas las categorías</option>
           {categories.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
+        <select
+          value={selectedSeason}
+          onChange={e => setSelectedSeason(e.target.value)}
+          className="form-select"
+          style={{ minWidth: '180px', width: 'auto' }}
+        >
+          <option value="">Todas las temporadas</option>
+          {seasons.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select
+          value={selectedCollection}
+          onChange={e => setSelectedCollection(e.target.value)}
+          className="form-select"
+          style={{ minWidth: '180px', width: 'auto' }}
+        >
+          <option value="">Todas las colecciones</option>
+          {collections.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={onlyPromotions}
+            onChange={e => setOnlyPromotions(e.target.checked)}
+          />
+          Solo Promociones
+        </label>
       </div>
 
       {loading ? (
@@ -100,15 +136,23 @@ export const CatalogPage = () => {
                 )}
               </div>
               <div>
-                <span style={{ fontSize: '0.85rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{p.categoryName}</span>
-                <h3 className="product-name">{p.name}</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '8px' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {p.categoryName}
+                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                    {p.seasonName && <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>{p.seasonName}</span>}
+                    {p.collectionName && <span style={{ fontSize: '0.7rem', backgroundColor: '#fed7aa', padding: '2px 6px', borderRadius: '4px' }}>{p.collectionName}</span>}
+                  </div>
+                </div>
+                <h3 className="product-name" style={{ marginTop: '8px' }}>{p.name}</h3>
                 {p.discount ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <p style={{ margin: 0, textDecoration: 'line-through', color: '#999', fontSize: '0.9rem' }}>Bs. {Number(p.price).toFixed(2)}</p>
                     <p className="product-price" style={{ margin: 0, color: '#e53e3e' }}>Bs. {Number((p as any).finalPrice).toFixed(2)}</p>
                   </div>
                 ) : (
-                  <p className="product-price">Bs. {Number(p.price).toFixed(2)}</p>
+                  <p className="product-price" style={{ margin: 0 }}>Bs. {Number(p.price).toFixed(2)}</p>
                 )}
               </div>
             </div>

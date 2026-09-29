@@ -33,15 +33,20 @@ export const PosDashboardPage = () => {
   const [error, setError] = useState('');
   const [openingAmount, setOpeningAmount] = useState('');
   
-  // Closing states
   const [closingAmount, setClosingAmount] = useState('');
   const [isClosing, setIsClosing] = useState(false);
+  
+  const [reservasListas, setReservasListas] = useState(0);
 
   const fetchSession = async () => {
     try {
       setLoading(true);
       const res = await api.get('/cash-sessions/current');
       setData(res.data);
+
+      const resReservas = await api.get('/reservations');
+      const listas = resReservas.data.filter((r: any) => r.status === 'LISTA').length;
+      setReservasListas(listas);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al obtener sesión de caja');
     } finally {
@@ -178,6 +183,14 @@ export const PosDashboardPage = () => {
               <p style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', color: '#0056b3' }}>
                 <strong>Total Vendido:</strong> <strong>Bs. {data.session?.summary?.totalVendido.toFixed(2) || '0.00'}</strong>
               </p>
+              
+              <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '4px', border: '1px solid #ffeeba' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#856404' }}>Reservas</h4>
+                <p style={{ margin: 0, display: 'flex', justifyContent: 'space-between', color: '#856404', fontWeight: 'bold' }}>
+                  <span>Listas para entrega:</span>
+                  <span style={{ backgroundColor: '#ffc107', padding: '2px 8px', borderRadius: '10px' }}>{reservasListas}</span>
+                </p>
+              </div>
             </div>
             
             <button 

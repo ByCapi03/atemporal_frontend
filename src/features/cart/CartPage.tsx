@@ -147,9 +147,16 @@ export const CartPage = () => {
                   <p style={{ margin: '3px 0', color: '#666', fontSize: '0.88rem' }}>
                     Talla: <strong>{item.size}</strong> | Color: <strong>{item.color}</strong>
                   </p>
-                  <p style={{ margin: '3px 0', color: '#0056b3', fontWeight: 'bold' }}>
-                    Bs. {Number(item.price).toFixed(2)}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '3px 0' }}>
+                    <p style={{ margin: 0, color: '#0056b3', fontWeight: 'bold' }}>
+                      Bs. {Number(item.price).toFixed(2)}
+                    </p>
+                    {item.basePrice && item.basePrice > item.price && (
+                      <p style={{ margin: 0, color: '#999', textDecoration: 'line-through', fontSize: '0.85rem' }}>
+                        Bs. {Number(item.basePrice).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
 
                   {/* Stock Warnings */}
                   {isOutOfStock ? (

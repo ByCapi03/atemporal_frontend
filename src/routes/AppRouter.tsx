@@ -22,11 +22,13 @@ import { BranchesPage } from '../features/branches/BranchesPage';
 import { CreateReservationPage } from '../features/reservations/CreateReservationPage';
 import { CartPage } from '../features/cart/CartPage';
 import { TryOnPage } from '../features/try-on/TryOnPage';
-import { ComingSoon } from '../components/ComingSoon';
+import { CheckoutPage } from '../features/cart/CheckoutPage';
 
 // Account Pages
 import { AccountProfile } from '../features/account/AccountProfile';
 import { ReservationsPage } from '../features/reservations/ReservationsPage';
+import { PurchasesPage } from '../features/account/PurchasesPage';
+import { PurchaseDetailPage } from '../features/account/PurchaseDetailPage';
 
 // Backoffice Pages
 import { DashboardPage } from '../features/home/DashboardPage';
@@ -61,7 +63,10 @@ export const AppRouter = () => {
           <Route path="try-on/:variantId" element={<TryOnPage />} />
           <Route path="reservations/new" element={<CreateReservationPage />} />
           <Route path="cart" element={<CartPage />} />
-          <Route path="checkout" element={<ComingSoon />} />
+          <Route element={<ProtectedRoute allowedRoles={[ROL.CLIENTE]}/>}>
+            <Route path="checkout" element={<CheckoutPage />} />
+            <Route path="checkout/success" element={<CheckoutPage />} />
+          </Route>
         </Route>
 
         {/* Client Account Routes */}
@@ -74,8 +79,8 @@ export const AppRouter = () => {
           <Route element={<ClientAccountLayout />}>
             <Route index element={<AccountProfile />} />
             <Route path="reservations" element={<ReservationsPage />} />
-            <Route path="purchases" element={<ComingSoon />} />
-            <Route path="purchases/:id" element={<ComingSoon />} />
+            <Route path="purchases" element={<PurchasesPage />} />
+            <Route path="purchases/:id" element={<PurchaseDetailPage />} />
           </Route>
         </Route>
 

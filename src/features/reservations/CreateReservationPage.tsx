@@ -66,30 +66,25 @@ export const CreateReservationPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.post('/reservations/intent', {
+      const resCreation = await api.post('/reservations', {
         branchId,
         date,
         approximateTime,
         items: [
           { variantId, quantity }
         ],
-        paymentOption
       });
 
-      const { paymentIntentId, amountToPay } = res.data;
+      const reservationId = resCreation.data.reservationId;
 
-      // Simular Pasarela MOCK
-      const simulateSuccess = window.confirm(`PASARELA MOCK (Stripe):\n\n¿Simular pago EXITOSO para el intento ${paymentIntentId} por Bs. ${amountToPay}?`);
+      const resPayment = await api.post(`/reservations/${reservationId}/create-payment`, {
+        paymentOption,
+        clientPlatform: 'web'
+      });
 
-      if (simulateSuccess) {
-        await api.post(`/payments/mock/${paymentIntentId}/succeed`, { amount: amountToPay });
-        alert('¡Reserva confirmada y pagada con éxito!');
-        sessionStorage.removeItem('pendingReservation');
-        navigate('/account/reservations');
-      } else {
-        await api.post(`/payments/mock/${paymentIntentId}/fail`, { amount: amountToPay });
-        alert('El pago fue rechazado o cancelado. La reserva no se completó.');
-      }
+      const checkoutUrl = resPayment.data.checkoutUrl;
+      sessionStorage.removeItem('pendingReservation');
+      window.location.href = checkoutUrl;
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear la reserva');
     } finally {

@@ -27,6 +27,14 @@ interface DashboardMetrics {
     totalAmount: number;
     salesCount: number;
   }[];
+  salesBySeason?: {
+    seasonName: string;
+    revenue: number;
+  }[];
+  salesByCollection?: {
+    collectionName: string;
+    revenue: number;
+  }[];
 }
 
 export const DashboardPage = () => {
@@ -37,20 +45,33 @@ export const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMetrics = async () => {
+  // Filters
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [branchId, setBranchId] = useState<string>('');
+  const [channel, setChannel] = useState<string>('');
+
+  const fetchMetrics = async () => {
       try {
         setLoading(true);
         setError(null);
-        const { data } = await api.get('/dashboard/metrics');
+        
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (isAdmin && branchId) params.append('branchId', branchId);
+        if (channel) params.append('channel', channel);
+
+        const { data } = await api.get(`/dashboard/metrics?${params.toString()}`);
         setMetrics(data);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Error al cargar las métricas del dashboard');
       } finally {
         setLoading(false);
       }
-    };
+  };
 
+  useEffect(() => {
     fetchMetrics();
   }, []);
 
@@ -65,7 +86,36 @@ export const DashboardPage = () => {
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '2rem', color: '#1a1a1a', margin: 0 }}>Dashboard Administrativo</h1>
-        <p style={{ color: '#666', margin: '4px 0 0 0' }}>Métricas de ventas e inventario en tiempo real</p>
+        <p style={{ color: '#666', margin: '4px 0 0 0' }}>Métricas de ventas e inventario</p>
+      </div>
+
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap', backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '8px' }}>
+        <div>
+          <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}>Desde:</label>
+          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}>Hasta:</label>
+          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+        </div>
+        {isAdmin && (
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}>Sucursal ID:</label>
+            <input type="number" placeholder="Todas" value={branchId} onChange={e => setBranchId(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '100px' }} />
+          </div>
+        )}
+        <div>
+          <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px' }}>Canal:</label>
+          <select value={channel} onChange={e => setChannel(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
+            <option value="">Todos</option>
+            <option value="WEB">WEB</option>
+            <option value="MOVIL">MÓVIL</option>
+            <option value="POS">POS</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+          <button onClick={fetchMetrics} style={{ padding: '8px 16px', backgroundColor: '#0056b3', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Filtrar</button>
+        </div>
       </div>
 
       {/* 4 Summary KPI Cards */}
@@ -223,6 +273,63 @@ export const DashboardPage = () => {
         )}
 
       </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px', marginTop: '24px' }}>
+        {/* Sales by Season */}
+        {metrics.salesBySeason && (
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+            <h3 style={{ fontSize: '1.1rem', color: '#333', marginTop: 0, marginBottom: '16px' }}>Ventas por Temporada</h3>
+            {metrics.salesBySeason.length === 0 ? (
+              <p style={{ color: '#888', fontSize: '0.9rem' }}>Sin transacciones.</p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f8f9fa', textAlign: 'left', borderBottom: '1px solid #eee' }}>
+                    <th style={{ padding: '8px' }}>Temporada</th>
+                    <th style={{ padding: '8px', textAlign: 'right' }}>Ingresos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {metrics.salesBySeason.map(s => (
+                    <tr key={s.seasonName} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '10px 8px', fontWeight: '500' }}>{s.seasonName}</td>
+                      <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 'bold' }}>Bs. {Number(s.revenue).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {/* Sales by Collection */}
+        {metrics.salesByCollection && (
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+            <h3 style={{ fontSize: '1.1rem', color: '#333', marginTop: 0, marginBottom: '16px' }}>Ventas por Colección</h3>
+            {metrics.salesByCollection.length === 0 ? (
+              <p style={{ color: '#888', fontSize: '0.9rem' }}>Sin transacciones.</p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f8f9fa', textAlign: 'left', borderBottom: '1px solid #eee' }}>
+                    <th style={{ padding: '8px' }}>Colección</th>
+                    <th style={{ padding: '8px', textAlign: 'right' }}>Ingresos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {metrics.salesByCollection.map(c => (
+                    <tr key={c.collectionName} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '10px 8px', fontWeight: '500' }}>{c.collectionName}</td>
+                      <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 'bold' }}>Bs. {Number(c.revenue).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };

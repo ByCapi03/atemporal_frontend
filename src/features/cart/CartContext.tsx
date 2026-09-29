@@ -8,6 +8,7 @@ export interface CartItem {
   size: string;
   color: string;
   price: number;
+  basePrice?: number;
   quantity: number;
   available: number;
 }

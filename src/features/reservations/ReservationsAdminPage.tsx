@@ -44,6 +44,14 @@ export const ReservationsAdminPage = () => {
       }
     });
 
+    socket.on('reservation.ready', (data: any) => {
+      if (user?.roles?.includes('CAJERO')) {
+        setToastMessage(`¡${data.message}!`);
+        setTimeout(() => setToastMessage(null), 5000);
+        fetchReservations();
+      }
+    });
+
     return () => {
       window.removeEventListener('RESERVATION_CREATED', handleNewReservation);
       socket.disconnect();

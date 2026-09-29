@@ -12,6 +12,9 @@ interface VariantInfo {
   sizeName: string;
   colorId: number;
   colorName: string;
+  colorHexCode?: string;
+  previewImageUrl?: string;
+  previewArImageUrl?: string;
 }
 
 interface ProductDetail {
@@ -21,6 +24,8 @@ interface ProductDetail {
   finalPrice?: number;
   discount?: { type: string; value: number; amount: number } | null;
   categoryName: string;
+  seasonName?: string;
+  collectionName?: string;
   imageUrl: string | null;
   arEnabled?: boolean;
   arImageUrl?: string | null;
@@ -160,7 +165,7 @@ export const ProductDetailPage = () => {
     const reservationState = {
       productId: product.id,
       productName: product.name,
-      price: product.price,
+      price: product.finalPrice || product.price,
       variantId: selectedVariant.id,
       sizeName: selectedVariant.sizeName,
       colorName: selectedVariant.colorName,
@@ -191,7 +196,8 @@ export const ProductDetailPage = () => {
         imageUrl: product.imageUrl,
         size: selectedVariant.sizeName,
         color: selectedVariant.colorName,
-        price: product.price,
+        price: product.finalPrice || product.price,
+        basePrice: product.price,
         quantity,
         available: selectedBranchAvailability.available
       },
@@ -211,13 +217,15 @@ export const ProductDetailPage = () => {
 
   const isActionDisabled = !selectedVariant || !selectedBranchId || quantity < 1 || maxAvailable < quantity;
 
+  const currentImageUrl = selectedVariant?.previewImageUrl || product.imageUrl;
+
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
       
       {/* Product Image */}
       <div style={{ flex: '1 1 400px', backgroundColor: '#f8f9fa', borderRadius: '8px', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', border: '1px solid #eee', overflow: 'hidden' }}>
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {currentImageUrl ? (
+          <img src={currentImageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           '[Imagen Principal del Producto]'
         )}
@@ -226,7 +234,13 @@ export const ProductDetailPage = () => {
       {/* Product Info & Selection */}
       <div style={{ flex: '1 1 400px' }}>
         <button onClick={() => navigate('/catalog')} style={{ background: 'none', border: 'none', color: 'var(--atemporal-gold)', cursor: 'pointer', padding: 0, marginBottom: '20px', fontWeight: 'bold' }}>&larr; Volver al catálogo</button>
-        <span style={{ display: 'block', fontSize: '0.9rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.categoryName}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ display: 'block', fontSize: '0.9rem', color: 'var(--atemporal-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.categoryName}</span>
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {product.seasonName && <span style={{ fontSize: '0.8rem', backgroundColor: '#e2e8f0', padding: '4px 8px', borderRadius: '4px' }}>{product.seasonName}</span>}
+            {product.collectionName && <span style={{ fontSize: '0.8rem', backgroundColor: '#fed7aa', padding: '4px 8px', borderRadius: '4px' }}>{product.collectionName}</span>}
+          </div>
+        </div>
         <h1 style={{ fontSize: '2.5rem', margin: '10px 0', color: 'var(--atemporal-green)' }}>{product.name}</h1>
         {product.discount ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
@@ -242,22 +256,36 @@ export const ProductDetailPage = () => {
 
         {/* Color Selection */}
         <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ marginBottom: '10px', color: 'var(--atemporal-green-dark)' }}>Color</h4>
+          <h4 style={{ marginBottom: '10px', color: 'var(--atemporal-green-dark)' }}>
+            Color: <span style={{ fontWeight: 'normal' }}>{uniqueColors.find(c => c.colorId === selectedColorId)?.colorName || 'Seleccione un color'}</span>
+          </h4>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             {uniqueColors.map(v => (
               <button
                 key={`color-${v.colorId}`}
+                title={v.colorName}
                 onClick={() => setSelectedColorId(selectedColorId === v.colorId ? null : v.colorId)}
                 style={{
-                  padding: '8px 16px',
-                  border: selectedColorId === v.colorId ? '2px solid var(--atemporal-green)' : '1px solid var(--atemporal-border)',
-                  backgroundColor: selectedColorId === v.colorId ? 'var(--atemporal-cream)' : 'var(--atemporal-white)',
-                  color: 'var(--atemporal-text)',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  border: selectedColorId === v.colorId ? '2px solid var(--atemporal-gold)' : '1px solid var(--atemporal-border)',
+                  backgroundColor: v.colorHexCode || 'var(--atemporal-cream)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: v.colorHexCode ? 'transparent' : 'var(--atemporal-text)',
+                  cursor: 'pointer',
+                  padding: 0,
+                  overflow: 'hidden',
+                  position: 'relative'
                 }}
               >
-                {v.colorName}
+                {!v.colorHexCode && <span style={{ fontSize: '10px' }}>{v.colorName.substring(0, 3)}</span>}
+                {/* Precache image invisibly to avoid flicker */}
+                {v.previewImageUrl && (
+                  <link rel="preload" as="image" href={v.previewImageUrl} />
+                )}
               </button>
             ))}
           </div>
