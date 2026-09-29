@@ -107,6 +107,10 @@ export const ProductDetailPage = () => {
     v => v.colorId === selectedColorId && v.sizeId === selectedSizeId
   );
 
+  const selectedColorVariant = product?.variants.find(
+    v => v.colorId === selectedColorId
+  );
+
   useEffect(() => {
     if (selectedVariant) {
       const fetchAvailability = async () => {
@@ -217,7 +221,7 @@ export const ProductDetailPage = () => {
 
   const isActionDisabled = !selectedVariant || !selectedBranchId || quantity < 1 || maxAvailable < quantity;
 
-  const currentImageUrl = selectedVariant?.previewImageUrl || product.imageUrl;
+  const currentImageUrl = selectedVariant?.previewImageUrl || selectedColorVariant?.previewImageUrl || product.imageUrl;
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px', display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
