@@ -14,7 +14,8 @@ export const ReservationsAdminPage = () => {
 
   const fetchReservations = async () => {
     try {
-      const { data } = await api.get('/reservations');
+      const url = isCajero ? '/reservations?deliveryQueue=true' : '/reservations';
+      const { data } = await api.get(url);
       setReservations(data);
     } catch (err) {
       console.error('Error fetching reservations', err);
@@ -191,7 +192,7 @@ export const ReservationsAdminPage = () => {
                               <option value="EFECTIVO">EFECTIVO</option>
                               <option value="TARJETA">TARJETA</option>
                               <option value="QR">QR</option>
-                              <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                              <option value="BILLETERA_MOVIL">BILLETERA_MOVIL</option>
                             </select>
                             <button 
                               onClick={() => handlePayAndDeliver(res.id)}

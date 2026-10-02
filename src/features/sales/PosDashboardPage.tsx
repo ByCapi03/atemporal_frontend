@@ -13,7 +13,6 @@ interface CashSessionData {
       cashSales: number;
       cardSales: number;
       qrSales: number;
-      transferSales: number;
       totalVendido: number;
       expectedAmount: number;
     };
@@ -175,9 +174,6 @@ export const PosDashboardPage = () => {
               </p>
               <p style={{ display: 'flex', justifyContent: 'space-between', margin: '2px 0' }}>
                 <span>Tarjeta:</span> <span>Bs. {data.session?.summary?.cardSales.toFixed(2) || '0.00'}</span>
-              </p>
-              <p style={{ display: 'flex', justifyContent: 'space-between', margin: '2px 0' }}>
-                <span>Transferencia:</span> <span>Bs. {data.session?.summary?.transferSales.toFixed(2) || '0.00'}</span>
               </p>
               <hr />
               <p style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', color: '#0056b3' }}>

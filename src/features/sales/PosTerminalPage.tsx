@@ -402,7 +402,7 @@ export const PosTerminalPage = () => {
               <option value="EFECTIVO">Efectivo</option>
               <option value="TARJETA">Tarjeta</option>
               <option value="QR">QR</option>
-              <option value="TRANSFERENCIA">Transferencia</option>
+              <option value="BILLETERA_MOVIL">Billetera móvil</option>
             </select>
           </div>
 

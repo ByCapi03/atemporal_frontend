@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB52zwwfpkRUkhaQoacF62xCeE_R2mB2pY",
@@ -12,6 +12,20 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+
+let messaging: any = null;
+
+// Initialize messaging only if supported and in a secure context
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  isSupported().then((supported) => {
+    if (supported) {
+      messaging = getMessaging(app);
+    }
+  }).catch((err) => {
+    console.warn("Firebase Messaging error on init:", err);
+  });
+} else {
+  console.warn("ServiceWorker no está disponible. Firebase Messaging deshabilitado.");
+}
 
 export { messaging, getToken, onMessage, firebaseConfig };

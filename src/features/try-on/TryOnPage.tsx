@@ -9,6 +9,9 @@ interface ProductDetail {
   price: number;
   imageUrl?: string;
   arImageUrl: string | null;
+  arTorsoUrl?: string | null;
+  arLeftSleeveUrl?: string | null;
+  arRightSleeveUrl?: string | null;
   arType: 'TOP' | 'BOTTOM' | 'DRESS';
 }
 
@@ -29,6 +32,9 @@ export const TryOnPage = () => {
   const [noBodyDetected, setNoBodyDetected] = useState(false);
   
   const garmentImage = useRef<HTMLImageElement | null>(null);
+  const garmentTorsoImage = useRef<HTMLImageElement | null>(null);
+  const garmentLeftSleeveImage = useRef<HTMLImageElement | null>(null);
+  const garmentRightSleeveImage = useRef<HTMLImageElement | null>(null);
 
   // Load product data
   useEffect(() => {
@@ -49,6 +55,15 @@ export const TryOnPage = () => {
         img.onload = () => {
           garmentImage.current = img;
         };
+
+        if (productData.arTorsoUrl && productData.arLeftSleeveUrl && productData.arRightSleeveUrl) {
+          const tImg = new Image(); tImg.src = productData.arTorsoUrl; tImg.crossOrigin = "anonymous";
+          tImg.onload = () => { garmentTorsoImage.current = tImg; };
+          const lImg = new Image(); lImg.src = productData.arLeftSleeveUrl; lImg.crossOrigin = "anonymous";
+          lImg.onload = () => { garmentLeftSleeveImage.current = lImg; };
+          const rImg = new Image(); rImg.src = productData.arRightSleeveUrl; rImg.crossOrigin = "anonymous";
+          rImg.onload = () => { garmentRightSleeveImage.current = rImg; };
+        }
 
         setProduct(productData);
       } catch (err) {
@@ -132,6 +147,8 @@ export const TryOnPage = () => {
 
       const ls = getPt(5); // left_shoulder
       const rs = getPt(6); // right_shoulder
+      const le = getPt(7); // left_elbow
+      const re = getPt(8); // right_elbow
       const lh = getPt(11); // left_hip
       const rh = getPt(12); // right_hip
       const lk = getPt(13); // left_knee
@@ -153,18 +170,73 @@ export const TryOnPage = () => {
         const shoulderDist = Math.hypot(rs.x - ls.x, rs.y - ls.y);
         const torsoHeight = Math.hypot(midHip.x - midShoulder.x, midHip.y - midShoulder.y);
         
-        // Fix rotation: En un canvas invertido (scale(-1, 1)), el hombro izquierdo (ls) 
-        // tiene mayor X que el derecho (rs). Para que el ángulo sea 0 en lugar de 180, usamos ls.x - rs.x.
-        const angle = Math.atan2(rs.y - ls.y, ls.x - rs.x);
-        
         const width = shoulderDist * 1.6;
         const height = torsoHeight * 1.3;
 
-        ctx.translate(midShoulder.x, midShoulder.y);
-        ctx.rotate(angle);
-        
-        // Draw the garment
-        ctx.drawImage(garmentImage.current, -width / 2, -height * 0.1, width, height);
+        const isArticulated = garmentTorsoImage.current && garmentLeftSleeveImage.current && garmentRightSleeveImage.current;
+
+        if (isArticulated) {
+          // Draw torso
+          ctx.save();
+          const angle = Math.atan2(rs.y - ls.y, ls.x - rs.x);
+          ctx.translate(midShoulder.x, midShoulder.y);
+          ctx.rotate(angle);
+          ctx.drawImage(garmentTorsoImage.current!, -width / 2, -height * 0.1, width, height);
+          ctx.restore();
+
+          // Draw sleeves
+          const drawSleeve = (shoulder: any, elbow: any, hip: any, img: HTMLImageElement, isLeft: boolean) => {
+            let ex, ey;
+            if (elbow) {
+              ex = elbow.x;
+              ey = elbow.y;
+            } else {
+              const hx = hip.x - shoulder.x;
+              const hy = hip.y - shoulder.y;
+              const hlen = Math.hypot(hx, hy) || 1;
+              const sLen = hlen * 0.4;
+              ex = shoulder.x + (hx / hlen) * sLen;
+              ey = shoulder.y + (hy / hlen) * sLen;
+            }
+
+            const sx = shoulder.x;
+            const sy = shoulder.y;
+            const dx = ex - sx;
+            const dy = ey - sy;
+            let sAngle = Math.atan2(dy, dx);
+            const sLength = Math.hypot(dx, dy);
+
+            const sWidth = sLength * 1.3;
+            const sHeight = sWidth * 0.4;
+            const overlap = sWidth * 0.15; // 15% overlap on the shoulder
+
+            ctx.save();
+            ctx.translate(sx, sy);
+            
+            if (isLeft) {
+              ctx.rotate(sAngle);
+              ctx.drawImage(img, -overlap, -sHeight / 2, sWidth, sHeight);
+            } else {
+              sAngle = sAngle - Math.PI;
+              ctx.rotate(sAngle);
+              ctx.drawImage(img, -sWidth + overlap, -sHeight / 2, sWidth, sHeight);
+            }
+            
+            ctx.restore();
+          };
+
+          drawSleeve(ls, le, lh, garmentLeftSleeveImage.current!, true);
+          drawSleeve(rs, re, rh, garmentRightSleeveImage.current!, false);
+
+        } else {
+          // Fallback to rigid
+          const angle = Math.atan2(rs.y - ls.y, ls.x - rs.x);
+          ctx.save();
+          ctx.translate(midShoulder.x, midShoulder.y);
+          ctx.rotate(angle);
+          ctx.drawImage(garmentImage.current!, -width / 2, -height * 0.1, width, height);
+          ctx.restore();
+        }
 
       } else if (product.arType === 'BOTTOM' && lh && rh) {
         detected = true;

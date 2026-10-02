@@ -23,6 +23,7 @@ import { CreateReservationPage } from '../features/reservations/CreateReservatio
 import { CartPage } from '../features/cart/CartPage';
 import { TryOnPage } from '../features/try-on/TryOnPage';
 import { CheckoutPage } from '../features/cart/CheckoutPage';
+import { QrPaymentPage } from '../features/reservations/QrPaymentPage';
 
 // Account Pages
 import { AccountProfile } from '../features/account/AccountProfile';
@@ -54,6 +55,9 @@ export const AppRouter = () => {
           <Route path="/activate-account" element={<ActivateAccountPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
+
+        {/* Public QR Payment Page */}
+        <Route path="/qr-payment/:token" element={<QrPaymentPage />} />
 
         {/* Store Routes (Customer Facing) */}
         <Route path="/" element={<StoreLayout />}>

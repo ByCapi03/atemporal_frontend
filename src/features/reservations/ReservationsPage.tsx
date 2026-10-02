@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/axios';
 import '../../styles/store.css';
 
@@ -6,6 +7,8 @@ export const ReservationsPage = () => {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const fetchReservations = async () => {
     try {
@@ -21,8 +24,26 @@ export const ReservationsPage = () => {
   };
 
   useEffect(() => {
-    fetchReservations();
-  }, []);
+    const sessionId = searchParams.get('session_id');
+    const payment = searchParams.get('payment');
+
+    const initialize = async () => {
+      if (sessionId && payment === 'success') {
+        try {
+          await api.post(`/reservations/reconcile-session/${sessionId}`);
+          // Remove params from URL to avoid re-triggering
+          searchParams.delete('session_id');
+          searchParams.delete('payment');
+          setSearchParams(searchParams);
+        } catch (e) {
+          console.error('Error reconciling session:', e);
+        }
+      }
+      fetchReservations();
+    };
+
+    initialize();
+  }, [searchParams, setSearchParams]);
 
   const handleCancel = async (id: number) => {
     if (!window.confirm('¿Estás seguro que deseas cancelar esta reserva?')) return;

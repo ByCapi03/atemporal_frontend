@@ -13,6 +13,9 @@ interface Product {
   sourceColor?: string;
   arEnabled?: boolean;
   arImageUrl?: string;
+  arTorsoUrl?: string;
+  arLeftSleeveUrl?: string;
+  arRightSleeveUrl?: string;
   arType?: 'TOP' | 'BOTTOM' | 'DRESS' | null;
   category?: { name: string };
   collection?: { name: string, season?: { name: string } };
@@ -33,6 +36,15 @@ export const ProductsSection = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedArFile, setSelectedArFile] = useState<File | null>(null);
   const [previewArUrl, setPreviewArUrl] = useState<string | null>(null);
+
+  const [arMode, setArMode] = useState<'RIGID' | 'ARTICULATED'>('RIGID');
+  const [selectedTorsoFile, setSelectedTorsoFile] = useState<File | null>(null);
+  const [previewTorsoUrl, setPreviewTorsoUrl] = useState<string | null>(null);
+  const [selectedLeftSleeveFile, setSelectedLeftSleeveFile] = useState<File | null>(null);
+  const [previewLeftSleeveUrl, setPreviewLeftSleeveUrl] = useState<string | null>(null);
+  const [selectedRightSleeveFile, setSelectedRightSleeveFile] = useState<File | null>(null);
+  const [previewRightSleeveUrl, setPreviewRightSleeveUrl] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,6 +118,16 @@ export const ProductsSection = () => {
     await api.post(`/products/${productId}/ar-image`, formData);
   };
 
+  const uploadArPart = async (productId: number, file: File, part: 'torso' | 'left-sleeve' | 'right-sleeve') => {
+    const formData = new FormData();
+    formData.append('image', file);
+    await api.post(`/products/${productId}/ar-${part}`, formData);
+  };
+
+  const deleteArPart = async (productId: number, part: 'rigid' | 'torso' | 'leftSleeve' | 'rightSleeve') => {
+    await api.delete(`/products/${productId}/ar-part/${part}`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -138,11 +160,21 @@ export const ProductsSection = () => {
         }
       }
 
-      if (selectedArFile && productId) {
+      if (arMode === 'RIGID' && selectedArFile && productId) {
         try {
           await uploadArImage(productId, selectedArFile);
         } catch (imgErr: any) {
           alert('Error al subir la imagen AR: ' + (imgErr.response?.data?.message || imgErr.message));
+        }
+      }
+
+      if (arMode === 'ARTICULATED' && productId) {
+        try {
+          if (selectedTorsoFile) await uploadArPart(productId, selectedTorsoFile, 'torso');
+          if (selectedLeftSleeveFile) await uploadArPart(productId, selectedLeftSleeveFile, 'left-sleeve');
+          if (selectedRightSleeveFile) await uploadArPart(productId, selectedRightSleeveFile, 'right-sleeve');
+        } catch (imgErr: any) {
+          alert('Error al subir piezas AR: ' + (imgErr.response?.data?.message || imgErr.message));
         }
       }
 
@@ -161,6 +193,13 @@ export const ProductsSection = () => {
     setPreviewUrl(null);
     setSelectedArFile(null);
     setPreviewArUrl(null);
+    setArMode('RIGID');
+    setSelectedTorsoFile(null);
+    setPreviewTorsoUrl(null);
+    setSelectedLeftSleeveFile(null);
+    setPreviewLeftSleeveUrl(null);
+    setSelectedRightSleeveFile(null);
+    setPreviewRightSleeveUrl(null);
     setShowForm(false);
   };
 
@@ -181,6 +220,19 @@ export const ProductsSection = () => {
     setPreviewUrl(p.imageUrl || null);
     setSelectedArFile(null);
     setPreviewArUrl(p.arImageUrl || null);
+    setSelectedTorsoFile(null);
+    setPreviewTorsoUrl(p.arTorsoUrl || null);
+    setSelectedLeftSleeveFile(null);
+    setPreviewLeftSleeveUrl(p.arLeftSleeveUrl || null);
+    setSelectedRightSleeveFile(null);
+    setPreviewRightSleeveUrl(p.arRightSleeveUrl || null);
+
+    if (p.arTorsoUrl && p.arLeftSleeveUrl && p.arRightSleeveUrl) {
+      setArMode('ARTICULATED');
+    } else {
+      setArMode('RIGID');
+    }
+
     setShowForm(true);
     setOpenMenuId(null);
   };
@@ -333,25 +385,112 @@ export const ProductsSection = () => {
             </div>
 
             {form.arEnabled && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Tipo de Prenda AR</label>
-                  <select required value={form.arType} onChange={e => setForm({ ...form, arType: e.target.value })} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '6px', backgroundColor: 'white', outline: 'none' }}>
-                    <option value="">Seleccione...</option>
-                    <option value="TOP">Superior (Poleras, Camisas)</option>
-                    <option value="BOTTOM">Inferior (Pantalones, Faldas)</option>
-                    <option value="DRESS">Vestidos (Cuerpo Entero)</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Imagen especial para AR (Opcional)</label>
-                  <input type="file" accept="image/jpeg, image/png, image/webp" onChange={handleArFileChange} style={{ fontSize: '0.85rem' }} />
-                  {previewArUrl ? (
-                    <img src={previewArUrl} alt="Preview AR" style={{ width: '60px', height: '60px', objectFit: 'contain', borderRadius: '6px', marginTop: '10px', backgroundColor: '#f0f0f0' }} />
-                  ) : (
-                    <span style={{ fontSize: '0.8rem', color: '#666', marginTop: '8px' }}>Si se omite, se usará la imagen principal del producto.</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginBottom: '30px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Tipo de Prenda AR</label>
+                    <select required value={form.arType} onChange={e => setForm({ ...form, arType: e.target.value })} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '6px', backgroundColor: 'white', outline: 'none' }}>
+                      <option value="">Seleccione...</option>
+                      <option value="TOP">Superior (Poleras, Camisas)</option>
+                      <option value="BOTTOM">Inferior (Pantalones, Faldas)</option>
+                      <option value="DRESS">Vestidos (Cuerpo Entero)</option>
+                    </select>
+                  </div>
+                  
+                  {form.arType === 'TOP' && (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Modo de vestidor</label>
+                      <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                          <input type="radio" checked={arMode === 'RIGID'} onChange={() => setArMode('RIGID')} style={{ marginRight: '8px' }} />
+                          Imagen rígida
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                          <input type="radio" checked={arMode === 'ARTICULATED'} onChange={() => setArMode('ARTICULATED')} style={{ marginRight: '8px' }} />
+                          Prenda articulada
+                        </label>
+                      </div>
+                    </div>
                   )}
                 </div>
+
+                {arMode === 'RIGID' || form.arType !== 'TOP' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', padding: '15px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px dashed #d1d5db' }}>
+                    <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Imagen especial para AR (Completa)</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <input type="file" accept="image/jpeg, image/png, image/webp" onChange={handleArFileChange} style={{ fontSize: '0.85rem' }} />
+                      {form.id !== 0 && previewArUrl && (
+                        <button type="button" onClick={async () => {
+                          if (confirm('¿Eliminar imagen AR rígida?')) {
+                            await deleteArPart(form.id, 'rigid');
+                            setPreviewArUrl(null);
+                          }
+                        }} style={{ fontSize: '0.8rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Eliminar</button>
+                      )}
+                    </div>
+                    {previewArUrl ? (
+                      <img src={previewArUrl} alt="Preview AR" style={{ width: '80px', height: '80px', objectFit: 'contain', borderRadius: '6px', marginTop: '10px', backgroundColor: '#fff', border: '1px solid #eee' }} />
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: '#666', marginTop: '8px' }}>Si se omite, se usará la imagen principal del producto.</span>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', padding: '15px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px dashed #86efac' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Torso (PNG sin fondo)</label>
+                      <input type="file" accept="image/png, image/webp" onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSelectedTorsoFile(e.target.files[0]);
+                          setPreviewTorsoUrl(URL.createObjectURL(e.target.files[0]));
+                        }
+                      }} style={{ fontSize: '0.8rem', marginBottom: '10px' }} />
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        {previewTorsoUrl && <img src={previewTorsoUrl} alt="Torso" style={{ width: '60px', height: '60px', objectFit: 'contain', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #ccc' }} />}
+                        {form.id !== 0 && previewTorsoUrl && (
+                          <button type="button" onClick={async () => {
+                            if (confirm('¿Eliminar torso?')) { await deleteArPart(form.id, 'torso'); setPreviewTorsoUrl(null); }
+                          }} style={{ fontSize: '0.75rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }}>Borrar</button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Manga Izquierda</label>
+                      <input type="file" accept="image/png, image/webp" onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSelectedLeftSleeveFile(e.target.files[0]);
+                          setPreviewLeftSleeveUrl(URL.createObjectURL(e.target.files[0]));
+                        }
+                      }} style={{ fontSize: '0.8rem', marginBottom: '10px' }} />
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        {previewLeftSleeveUrl && <img src={previewLeftSleeveUrl} alt="Left Sleeve" style={{ width: '60px', height: '60px', objectFit: 'contain', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #ccc' }} />}
+                        {form.id !== 0 && previewLeftSleeveUrl && (
+                          <button type="button" onClick={async () => {
+                            if (confirm('¿Eliminar manga izquierda?')) { await deleteArPart(form.id, 'leftSleeve'); setPreviewLeftSleeveUrl(null); }
+                          }} style={{ fontSize: '0.75rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }}>Borrar</button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label style={{ marginBottom: '5px', fontWeight: '500', fontSize: '0.9rem' }}>Manga Derecha</label>
+                      <input type="file" accept="image/png, image/webp" onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSelectedRightSleeveFile(e.target.files[0]);
+                          setPreviewRightSleeveUrl(URL.createObjectURL(e.target.files[0]));
+                        }
+                      }} style={{ fontSize: '0.8rem', marginBottom: '10px' }} />
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        {previewRightSleeveUrl && <img src={previewRightSleeveUrl} alt="Right Sleeve" style={{ width: '60px', height: '60px', objectFit: 'contain', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #ccc' }} />}
+                        {form.id !== 0 && previewRightSleeveUrl && (
+                          <button type="button" onClick={async () => {
+                            if (confirm('¿Eliminar manga derecha?')) { await deleteArPart(form.id, 'rightSleeve'); setPreviewRightSleeveUrl(null); }
+                          }} style={{ fontSize: '0.75rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }}>Borrar</button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

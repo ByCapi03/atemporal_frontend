@@ -158,7 +158,7 @@ export const ReportsPage = () => {
                   <option value="EFECTIVO">EFECTIVO</option>
                   <option value="TARJETA">TARJETA</option>
                   <option value="QR">QR</option>
-                  <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                  <option value="BILLETERA_MOVIL">BILLETERA_MOVIL</option>
                 </select>
               </div>
             </>
